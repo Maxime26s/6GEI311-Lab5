@@ -8,10 +8,12 @@ import cv2
 from imutils.video import FileVideoStream, VideoStream
 import threading
 from time import time
+from image_acquisition import get_image
 
 image_processing = ImageProcessing()
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
+
 class Application(tk.Frame):
     # Initialisation de la fenêtre
     def __init__(self, master=None):
@@ -25,6 +27,7 @@ class Application(tk.Frame):
         self.thread = None
         self.last_frame_time = time()
         self.vs = FileVideoStream(path="./cam2.mp4").start()
+        
         # self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
@@ -43,8 +46,9 @@ class Application(tk.Frame):
         return Image.open(fileName)
 
     def select_two_images(self):
-        self.image1 = np.array(self.select_file("image1.png"))
-        self.image2 = np.array(self.select_file("image2.png"))
+        get_image()
+        self.image1 = np.array(self.select_file("images\IPcam1.png"))
+        self.image2 = np.array(self.select_file("images\IPcam2.png"))
         image = Image.fromarray(
             image_processing.process_image(self.image1, self.image2)
         )
