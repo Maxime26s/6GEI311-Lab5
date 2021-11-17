@@ -27,7 +27,6 @@ class Application(tk.Frame):
         self.thread = None
         self.last_frame_time = time()
         self.vs = FileVideoStream(path="./cam2.mp4").start()
-        
         # self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
@@ -46,7 +45,6 @@ class Application(tk.Frame):
         return Image.open(fileName)
 
     def select_two_images(self):
-        get_image()
         self.image1 = np.array(self.select_file("images\IPcam1.png"))
         self.image2 = np.array(self.select_file("images\IPcam2.png"))
         image = Image.fromarray(
@@ -56,10 +54,11 @@ class Application(tk.Frame):
 
     def video_loop(self):
         while True:
-            while time() <= self.last_frame_time + 30 / 1000:
+            while time() <= self.last_frame_time + 1 / 1000:
                 pass
             self.last_frame_time = time()
-            self.frame = self.vs.read()
+            # self.frame = self.vs.read()
+            self.frame = get_image()
             if self.frame is None:
                 break
 
