@@ -9,6 +9,9 @@ from imutils.video import FileVideoStream, VideoStream
 import threading
 from time import time
 from image_acquisition import get_image
+import send_email
+from functools import partial
+
 
 image_processing = ImageProcessing()
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
@@ -36,7 +39,13 @@ class Application(tk.Frame):
         self.selectFile1 = tk.Button(self)
         self.selectFile1["text"] = "Select files"
         self.selectFile1["command"] = self.video_loop
-        self.selectFile1.pack(side="top")
+        self.selectFile1.pack(side="bottom")
+
+        # self.button_test = tk.Button(self, 
+        #                             text="Send email",
+        #                             command=partial(send_email))
+        # self.button_test.pack(side="bottom")
+
 
     # Fonction de sélection de fichier
     def select_file(self, fileName=""):
