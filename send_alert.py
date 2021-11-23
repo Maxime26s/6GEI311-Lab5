@@ -32,8 +32,8 @@ def send_email():
     server.quit()
 
 def send_sms():
-    account_sid = 'ACb4d7f2ea83b8f378d0f8febf8b410d4e'
-    auth_token = 'a708a8a381ec895b6634a05108faca29'
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
     client = Client(account_sid, auth_token)
 
     message = client.messages \
