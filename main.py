@@ -1,3 +1,4 @@
+# pip install -r requirements.txt 
 import numpy as np
 import tkinter as tk
 import math
@@ -9,7 +10,7 @@ from imutils.video import FileVideoStream, VideoStream
 import threading
 from time import time
 from image_acquisition import get_image
-import send_email
+import send_alert
 from functools import partial
 
 
