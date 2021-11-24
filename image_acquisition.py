@@ -1,9 +1,11 @@
 # pip install -r requirements.txt
+# http://36.91.51.221:81/mjpg/video.mjpg
+# http://153.164.101.136:80/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp
 
 import cv2
 
 def get_image():
-        cap = cv2.VideoCapture('http://129.49.105.136:8080/?action=stream')
+        cap = cv2.VideoCapture('http://202.150.130.137:86/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER')
 
         while (True):
             ret, frame = cap.read()
@@ -28,7 +30,7 @@ def get_image():
 # import requests
 
 # def get_image():
-#     url = 'http://129.49.105.136:8080/?action=stream'
+#     url = 'http://205.237.248.39/axis-cgi/jpg/image.cgi?resolution=640x480'
 #     frame = requests.get(url)
 #     if frame.status_code == 200:
 #         return frame.content
