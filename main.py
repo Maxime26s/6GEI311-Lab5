@@ -36,7 +36,7 @@ class Options(tk.Toplevel):
         self.motion_buffer_size = ""
 
         self.option = tkinter.Toplevel()
-        self.option.geometry("+1000+700")
+        self.option.geometry("+1000+600")
         self.option.title("Options")
         self.tab = ttk.Notebook(self.option)  # Création du système d'onglets
         self.t1 = ttk.Frame(self.tab)  
