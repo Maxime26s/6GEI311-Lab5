@@ -9,7 +9,7 @@ from imutils.video import FileVideoStream, VideoStream
 import threading
 from time import time
 
-image_processing = ImageProcessing()
+image_processing = ImageProcessing(diff_threshold=20)
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
 class Application(tk.Frame):
@@ -24,8 +24,8 @@ class Application(tk.Frame):
         self.count = 0
         self.thread = None
         self.last_frame_time = time()
-        self.vs = FileVideoStream(path="./cam2.mp4").start()
-        # self.vs = VideoStream(src=0).start()
+        self.vs = FileVideoStream(path="./cam1.mp4").start()
+        #self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
 
