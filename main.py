@@ -2,7 +2,7 @@ import numpy as np
 import tkinter as tk
 import math
 from tkinter.filedialog import askopenfilename
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 from image_processing import ImageProcessing
 import cv2
 from imutils.video import FileVideoStream, VideoStream
@@ -24,8 +24,8 @@ class Application(tk.Frame):
         self.count = 0
         self.thread = None
         self.last_frame_time = time()
-        self.vs = FileVideoStream(path="./cam1.mp4").start()
-        #self.vs = VideoStream(src=0).start()
+        self.vs = FileVideoStream(path="./cam2.mp4").start()
+        # self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
 
@@ -60,12 +60,14 @@ class Application(tk.Frame):
                 break
 
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image = image_processing.process_image1(image)
+            image, boxes = image_processing.process_image1(image)
             # image = image_processing.resize_cv(image, 1920 / image.shape[1])
-            image = Image.fromarray(image_processing.color_movement.astype("uint8"))
+            image = Image.fromarray(image_processing.detection.astype("uint8"))
             # image = image.resize(
             #    (1920, int((float(image.size[1]) * float((1920 / float(image.size[0]))))))
             # )
+            for box in boxes:
+                image = self.draw_rectangle(image, box)
             self.display_image(image)
 
     def display_image(self, image1):
@@ -83,6 +85,13 @@ class Application(tk.Frame):
     def resize(self, image):
         size = 1920, 1080
         image.thumbnail(size, Image.ANTIALIAS)
+        return image
+
+    def draw_rectangle(self, image, box):
+        draw = ImageDraw.Draw(image)
+        draw.rectangle(
+            (box.p1.y, box.p1.x, box.p2.y, box.p2.x), fill=None, outline="red"
+        )
         return image
 
     # Fonction pour fermer l'application
