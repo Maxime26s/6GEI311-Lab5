@@ -24,7 +24,7 @@ class Application(tk.Frame):
         self.count = 0
         self.thread = None
         self.last_frame_time = time()
-        self.vs = FileVideoStream(path="./cam2.mp4").start()
+        self.vs = FileVideoStream(path="./camT.mp4").start()
         # self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
@@ -52,7 +52,7 @@ class Application(tk.Frame):
 
     def video_loop(self):
         while True:
-            while time() <= self.last_frame_time + 30 / 1000:
+            while time() <= self.last_frame_time + 1 / 30:
                 pass
             self.last_frame_time = time()
             self.frame = self.vs.read()
