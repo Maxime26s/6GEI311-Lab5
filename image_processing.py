@@ -6,9 +6,9 @@ from time import time
 import cv2
 from PIL import Image, ImageDraw
 from scipy.signal import convolve2d
-from numba import jit
+from skimage import measure
 
-from motion_detection import Motion_Detection
+from motion_detection import Motion_Detection, Box, Point
 
 
 class ImageProcessing:
@@ -130,7 +130,15 @@ class ImageProcessing:
             self.compression_ratio / self.scale_ratio,
         )
 
-        boxes = self.motion_detection.find_boxes(self.detection)
+        contours = measure.find_contours(self.detection)
+        boxes = []
+        for contour in contours:
+            Xmin = np.min(contour[:, 0])
+            Xmax = np.max(contour[:, 0])
+            Ymin = np.min(contour[:, 1])
+            Ymax = np.max(contour[:, 1])
+
+            boxes.append(Box(Point(Xmin, Ymin), Point(Xmax, Ymax)))
 
         return self.detection, boxes
 
