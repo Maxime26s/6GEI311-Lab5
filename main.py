@@ -272,8 +272,8 @@ class Interface(tk.Tk):
             while time() <= self.last_frame_time + 1 / 30:
                 pass
             self.last_frame_time = time()
-            self.frame = self.vs.read()
-            # self.frame = get_image()
+            # self.frame = self.vs.read()
+            self.frame = get_image()
             if self.frame is None:
                 break
 

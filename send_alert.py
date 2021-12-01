@@ -3,17 +3,36 @@ from twilio.rest import Client
 import smtplib
 from email.message import EmailMessage
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime
+
 
 def send_email():
 
     mail = EmailMessage()
 
-    email_text = "It's a test"
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    dt_string1 = now.strftime("%d%m%y_%H%M%S")
+
+    mail = MIMEMultipart()
+
+    email_text = MIMEText("Mouvement detected on the camera at " + dt_string)
+    mail.attach(email_text)
 
     mail['From'] = '6gei311@gmail.com'
     mail['Pass'] = 'M9hA7C6RN8nr'
     mail['To'] = mail['From']
-    mail['Subject'] = "TEST"
+    mail['Subject'] = "Alert - Mouvement detected"
+    
+    ImgFileName = "images/IPcam.png"
+    with open(ImgFileName, 'rb') as f:
+        img_data = f.read()
+    
+    if img_data is not None:
+        image = MIMEImage(img_data, name="IPcam1_" + dt_string1 + ".png")
+        mail.attach(image)
 
     try:
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
@@ -24,7 +43,7 @@ def send_email():
         print ('Error logging')
 
     try:
-        server.sendmail(mail['From'], mail['To'], email_text)
+        server.sendmail(mail['From'], mail['To'], mail.as_string())
         print('Email sent')
     except:
         print('Error sending email')
@@ -32,17 +51,22 @@ def send_email():
     server.quit()
 
 def send_sms():
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
     account_sid = os.environ['TWILIO_ACCOUNT_SID']
     auth_token = os.environ['TWILIO_AUTH_TOKEN']
     client = Client(account_sid, auth_token)
 
     message = client.messages \
                     .create(
-                        body="/!\ Alert /!\ Suspicious movement detected",
+                        body="/!\ Alert /!\ Suspicious movement detected. \n " \
+                             "Check your mail. \n\n" \
+                             + dt_string,
                         from_='+15812055890',
                         to='+15815609495'
                  )
     print(message.sid)
 if __name__ == "__main__":
-    # send_email()
-    send_sms()
+    send_email()
+    # send_sms()

@@ -1,11 +1,12 @@
 # pip install -r requirements.txt
 # http://36.91.51.221:81/mjpg/video.mjpg
 # http://153.164.101.136:80/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp
+# http://202.150.130.137:86/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER
 
 import cv2
 
 def get_image():
-        cap = cv2.VideoCapture('http://202.150.130.137:86/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER')
+        cap = cv2.VideoCapture('http://216.197.229.166:1024/img/video.mjpeg')
 
         while (True):
             ret, frame = cap.read()
