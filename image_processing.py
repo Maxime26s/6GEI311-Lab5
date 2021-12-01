@@ -12,9 +12,9 @@ from numba import jit
 class ImageProcessing:
     def __init__(
         self,
-        diff_threshold=5,
+        diff_threshold=20,
         scale_ratio=0.2,
-        compression_ratio=0.1,
+        compression_ratio=0.5,
         bg_buffer_size=10,
         motion_buffer_size=2,
     ):

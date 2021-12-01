@@ -221,20 +221,17 @@ class Interface(tk.Tk):
             width = 10,
             # command=partial(self.open_help),
         )
-        button5.grid(row=1, column=4, padx=5, pady=5)
-
-
-        # self.button_test = tk.Button(self, 
-        #                             text="Send email",
-        #                             command=partial(send_email))
-        # self.button_test.pack(side="bottom")
-        
+        button5.grid(row=1, column=4, padx=5, pady=5)       
 
     # Fonction de sélection de fichier
     def select_file(self):
+        image_processing = ImageProcessing()
         Tk().withdraw()
         fileName = askopenfilename()
         self.path = fileName
+        self.vs = FileVideoStream(self.path).start()
+        self.thread = threading.Thread(target=self.video_loop, args=())
+        self.thread.start()
         return
 
     def open_motiom_filter(self):
@@ -242,13 +239,12 @@ class Interface(tk.Tk):
         motion_filter.geometry("+1000+100")
         motion_filter.title("Motion Filter")
 
-        if self.label is None:
-            self.label = tk.Label(motion_filter, image=self.image)
-            self.label.grid(row=0, columnspan=5, padx=10,pady=10)
-        else:
-            self.label.configure(image=self.image)
+        
+        self.label = tk.Label(motion_filter, image=self.image)
+        self.label.grid(row=0, columnspan=5, padx=10,pady=10)
+        
 
-        self.label.image = self.image
+        
 
     def open_stat(self):
         stat = tk.Toplevel()
@@ -272,8 +268,10 @@ class Interface(tk.Tk):
             while time() <= self.last_frame_time + 1 / 30:
                 pass
             self.last_frame_time = time()
-            # self.frame = self.vs.read()
-            self.frame = get_image()
+            self.frame = self.vs.read()
+            # self.frame = get_image()
+            image = Image.fromarray(self.frame)
+            image.save("images/IPcam.png")
             if self.frame is None:
                 break
 
@@ -282,7 +280,7 @@ class Interface(tk.Tk):
             # image = image_processing.resize_cv(image, 1920 / image.shape[1])
             image = Image.fromarray(image_processing.color_movement.astype("uint8"))
             # image = image.resize(
-            #    (1920, int((float(image.size[1]) * float((1920 / float(image.size[0]))))))
+            #    (960, int(float(image.size[1]) * float(960 / float(image.size[0]))))
             # )
             self.display_image(image)
 
@@ -299,7 +297,7 @@ class Interface(tk.Tk):
         self.count += 1
 
     def resize(self, image):
-        size = 1920, 1080
+        size = 960, 540
         image.thumbnail(size, Image.ANTIALIAS)
         return image
 
