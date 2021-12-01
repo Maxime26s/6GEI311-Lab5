@@ -24,7 +24,7 @@ class Application(tk.Frame):
         self.count = 0
         self.thread = None
         self.last_frame_time = time()
-        self.vs = FileVideoStream(path="./camT.mp4").start()
+        self.vs = FileVideoStream(path="./cam2.mp4").start()
         # self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
@@ -42,14 +42,6 @@ class Application(tk.Frame):
             fileName = askopenfilename()
         return Image.open(fileName)
 
-    def select_two_images(self):
-        self.image1 = np.array(self.select_file("image1.png"))
-        self.image2 = np.array(self.select_file("image2.png"))
-        image = Image.fromarray(
-            image_processing.process_image(self.image1, self.image2)
-        )
-        self.display_image(image)
-
     def video_loop(self):
         while True:
             while time() <= self.last_frame_time + 1 / 30:
@@ -60,14 +52,26 @@ class Application(tk.Frame):
                 break
 
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image, boxes = image_processing.process_image1(image)
+            image, motion, detection, boxes = image_processing.process_image1(image)
+            image = Image.fromarray(image.astype("uint8"))
+            motion = Image.fromarray(motion.astype("uint8"))
+            detection = Image.fromarray(detection.astype("uint8"))
             # image = image_processing.resize_cv(image, 1920 / image.shape[1])
-            image = Image.fromarray(image_processing.detection.astype("uint8"))
+            # image = Image.fromarray(image_processing.detection.astype("uint8"))
             # image = image.resize(
             #    (1920, int((float(image.size[1]) * float((1920 / float(image.size[0]))))))
             # )
             for box in boxes:
+                detection = self.draw_rectangle(detection, box)
+                box.resize(detection.size[0], image.size[0])
                 image = self.draw_rectangle(image, box)
+            detection = Image.fromarray(
+                cv2.resize(
+                    np.asarray(detection),
+                    image.size,
+                    cv2.INTER_CUBIC,
+                ).astype("uint8")
+            )
             self.display_image(image)
 
     def display_image(self, image1):
@@ -82,9 +86,8 @@ class Application(tk.Frame):
 
         self.count += 1
 
-    def resize(self, image):
-        size = 1920, 1080
-        image.thumbnail(size, Image.ANTIALIAS)
+    def resize(self, image, size=(1920, 1080)):
+        image = image.thumbnail(size, Image.ANTIALIAS)
         return image
 
     def draw_rectangle(self, image, box):

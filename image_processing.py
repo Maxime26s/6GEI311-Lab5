@@ -30,7 +30,7 @@ class ImageProcessing:
         self.bg_buffer = deque(maxlen=bg_buffer_size)
         self.motion_buffer = deque(maxlen=motion_buffer_size)
         self.orig_frames = deque(maxlen=motion_buffer_size)
-        self.motion_detection = Motion_Detection(1, 1)
+        self.motion_detection = Motion_Detection()
         self.bg_sum = None
         self.color_movement = None
         self.detection = None
@@ -130,17 +130,9 @@ class ImageProcessing:
             self.compression_ratio / self.scale_ratio,
         )
 
-        contours = measure.find_contours(self.detection)
-        boxes = []
-        for contour in contours:
-            Xmin = np.min(contour[:, 0])
-            Xmax = np.max(contour[:, 0])
-            Ymin = np.min(contour[:, 1])
-            Ymax = np.max(contour[:, 1])
+        boxes = self.motion_detection.find_boxes(self.detection)
 
-            boxes.append(Box(Point(Xmin, Ymin), Point(Xmax, Ymax)))
-
-        return self.detection, boxes
+        return image, movement, self.detection, boxes
 
     def calc_weighted_movement_average(self, movement_shape):
         weighted_sum = np.zeros(movement_shape, dtype="float32")

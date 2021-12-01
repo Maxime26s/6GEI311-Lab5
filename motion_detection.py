@@ -1,17 +1,44 @@
 from tkinter.constants import X
-
+from skimage import measure
+import math
 import numpy as np
 
 
 class Motion_Detection:
-    def __init__(self, step=1, min_size=1):
+    def __init__(self, step=1, min_size=-1):
         self.step = step
         self.min_size = min_size
 
     def find_boxes(self, image):
+        min = self.min_size
+        if min == -1:
+            min = image.size * 0.001
+        contours = measure.find_contours(
+            image, fully_connected="low", positive_orientation="low"
+        )
+        boxes = []
+        for contour in contours:
+            Xmin = np.min(contour[:, 0])
+            Xmax = np.max(contour[:, 0])
+            Ymin = np.min(contour[:, 1])
+            Ymax = np.max(contour[:, 1])
+
+            box = Box(Point(Xmin, Ymin), Point(Xmax, Ymax))
+            if box.size() >= min:
+                boxes.append(box)
+
+        # for box1 in boxes:
+        # for box2 in boxes:
+        # if box1.contains(box2.p1.x, box2.p1.y) or box1.contains(
+        # box2.p2.x, box2.p2.y
+        # ):
+        # boxes.remove(box2)
+
+        return boxes
+
         boxes = []
         y = 0
-        x = 0
+        x = 0.0
         while y < image.shape[0]:
             while x < image.shape[1]:
                 for box in boxes:
@@ -82,6 +109,10 @@ class Point:
         self.x = x
         self.y = y
 
+    def resize(self, ratio):
+        self.x = math.floor(self.x * ratio)
+        self.y = math.floor(self.y * ratio)
+
 
 class Box:
     def __init__(self, p1, p2=Point(0, 0)):
@@ -107,6 +138,11 @@ class Box:
             if y >= self.p1.y and y <= self.p2.y:
                 return True
         return False
+
+    def resize(self, old, new):
+        ratio = new / old
+        self.p1.resize(ratio)
+        self.p2.resize(ratio)
 
 
 def max(a, b):
