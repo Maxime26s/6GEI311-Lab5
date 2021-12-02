@@ -13,13 +13,16 @@ from image_processing import ImageProcessing
 import cv2
 from imutils.video import FileVideoStream, VideoStream
 import threading
-from time import time
+import time
 from image_acquisition import get_image
 import send_alert
 
 
+
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
+image_processing = ImageProcessing(diff_threshold=20)
+
 class Options(tk.Toplevel):
     def __init__(self, parent):
         #super().__init__(parent)  # no need it
@@ -168,15 +171,16 @@ class Options(tk.Toplevel):
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
-        self.image_processing = ImageProcessing(diff_threshold=20)
-        self.path = "./camT.mp4"
+        image_processing = ImageProcessing(diff_threshold=20)
+        self.path = "./camT2.mp4"
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
         self.count = 0
         self.thread = None
-        self.change_video = False
-        self.last_frame_time = time()
+        self.alert_sent = False
+        # self.change_video = False
+        self.last_frame_time = time.time()
         self.vs = FileVideoStream(self.path).start()
         # self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
@@ -226,13 +230,13 @@ class Interface(tk.Tk):
 
     # Fonction de sélection de fichier
     def select_file(self):
-        self.image_processing = ImageProcessing(diff_threshold=20)
+        image_processing = ImageProcessing()
         Tk().withdraw()
         fileName = askopenfilename()
         self.path = fileName
         self.vs = FileVideoStream(self.path).start()
-        self.change_video = True
-        self.thread.join()
+        # self.change_video = True
+        # self.thread.join()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
         return
@@ -242,7 +246,7 @@ class Interface(tk.Tk):
         motion_filter.geometry("+1000+100")
         motion_filter.title("Motion Filter")
 
-        self.label = tk.Label(motion_filter, image=self.image)
+        self.label = tk.Label(motion_filter, image=self.detection)
         self.label.grid(row=0, columnspan=5, padx=10,pady=10)    
 
     def open_stat(self):
@@ -255,19 +259,18 @@ class Interface(tk.Tk):
         window.grab_set()
 
     def video_loop(self):
-        while self.change_video == False:
-            while time() <= self.last_frame_time + 1 / 30:
+        while True:
+            while time.time() <= self.last_frame_time + 1 / 30:
                 pass
-            self.last_frame_time = time()
+            self.last_frame_time = time.time()
             self.frame = self.vs.read()
             # self.frame = get_image()
-            image = Image.fromarray(self.frame)
-            image.save("images/IPcam.png")
+            
             if self.frame is None:
                 break
 
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image, motion, detection, boxes = self.image_processing.process_image1(image)
+            image, motion, detection, boxes = image_processing.process_image1(image)
             image = Image.fromarray(image.astype("uint8"))
             motion = Image.fromarray(motion.astype("uint8"))
             detection = Image.fromarray(detection.astype("uint8"))
@@ -281,9 +284,7 @@ class Interface(tk.Tk):
                 detection = self.draw_rectangle(detection, box)
                 box.resize(detection.size[0], image.size[0])
                 image = self.draw_rectangle(image, box)
-            size = (800,600)
-
-            # if len(boxes) >= 1:
+            size = (int(image.size[0] / 2), int(image.size[1] / 2))
 
             image = Image.fromarray(
                 cv2.resize(
@@ -293,7 +294,14 @@ class Interface(tk.Tk):
                 ).astype("uint8")
             )
             self.display_image(image)
-        self.change_video == False
+
+            if len(boxes) >= 2 and self.alert_sent == False:
+                image.save("images/IPcam.png")
+                # thread_send_email = threading.Thread(target=lambda: send_alert.send_email())
+                # thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms())
+                # thread_send_email.start()
+                # thread_send_sms.start()
+                self.alert_sent = True
 
     def display_image(self, image1):
         self.image = ImageTk.PhotoImage(image1)

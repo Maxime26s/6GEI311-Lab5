@@ -112,7 +112,7 @@ class ImageProcessing:
         a = time()
         movement_average = self.calc_weighted_movement_average(img_float.shape)
         b = time()
-        print(b - a)
+        # print(b - a)
 
         if len(self.bg_buffer):
             movement = self.substract_image(movement_average, background_average)

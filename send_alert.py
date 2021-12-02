@@ -49,6 +49,7 @@ def send_email():
         print('Error sending email')
         return
     server.quit()
+    return
 
 def send_sms():
     now = datetime.now()
