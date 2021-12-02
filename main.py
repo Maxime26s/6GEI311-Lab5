@@ -8,7 +8,7 @@ import tkinter.font as font
 from functools import partial
 import math
 from tkinter.filedialog import askopenfilename
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 from image_processing import ImageProcessing
 import cv2
 from imutils.video import FileVideoStream, VideoStream
@@ -18,7 +18,7 @@ from image_acquisition import get_image
 import send_alert
 
 
-image_processing = ImageProcessing()
+image_processing = ImageProcessing(diff_threshold=20)
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
 class Options(tk.Toplevel):
@@ -255,14 +255,6 @@ class Interface(tk.Tk):
         window = Options(self)
         window.grab_set()
 
-    def select_two_images(self):
-        self.image1 = np.array(self.select_file("images\IPcam1.png"))
-        self.image2 = np.array(self.select_file("images\IPcam2.png"))
-        image = Image.fromarray(
-            image_processing.process_image(self.image1, self.image2)
-        )
-        self.display_image(image)
-
     def video_loop(self):
         while True:
             while time() <= self.last_frame_time + 1 / 30:
@@ -276,12 +268,26 @@ class Interface(tk.Tk):
                 break
 
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image = image_processing.process_image1(image)
+            image, motion, detection, boxes = image_processing.process_image1(image)
+            image = Image.fromarray(image.astype("uint8"))
+            motion = Image.fromarray(motion.astype("uint8"))
+            detection = Image.fromarray(detection.astype("uint8"))
             # image = image_processing.resize_cv(image, 1920 / image.shape[1])
-            image = Image.fromarray(image_processing.color_movement.astype("uint8"))
+            # image = Image.fromarray(image_processing.detection.astype("uint8"))
             # image = image.resize(
             #    (960, int(float(image.size[1]) * float(960 / float(image.size[0]))))
             # )
+            for box in boxes:
+                detection = self.draw_rectangle(detection, box)
+                box.resize(detection.size[0], image.size[0])
+                image = self.draw_rectangle(image, box)
+            detection = Image.fromarray(
+                cv2.resize(
+                    np.asarray(detection),
+                    image.size,
+                    cv2.INTER_CUBIC,
+                ).astype("uint8")
+            )
             self.display_image(image)
 
     def display_image(self, image1):
@@ -296,9 +302,15 @@ class Interface(tk.Tk):
 
         self.count += 1
 
-    def resize(self, image):
-        size = 960, 540
-        image.thumbnail(size, Image.ANTIALIAS)
+    def resize(self, image, size=(1920, 1080)):
+        image = image.thumbnail(size, Image.ANTIALIAS)
+        return image
+
+    def draw_rectangle(self, image, box):
+        draw = ImageDraw.Draw(image)
+        draw.rectangle(
+            (box.p1.y, box.p1.x, box.p2.y, box.p2.x), fill=None, outline="red"
+        )
         return image
 
     # Fonction pour fermer l'application

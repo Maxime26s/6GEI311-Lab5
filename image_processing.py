@@ -4,9 +4,11 @@ from scipy.ndimage.filters import gaussian_filter
 from collections import deque
 from time import time
 import cv2
-from PIL import Image
+from PIL import Image, ImageDraw
 from scipy.signal import convolve2d
-from numba import jit
+from skimage import measure
+
+from motion_detection import Motion_Detection, Box, Point
 
 
 class ImageProcessing:
@@ -28,6 +30,7 @@ class ImageProcessing:
         self.bg_buffer = deque(maxlen=bg_buffer_size)
         self.motion_buffer = deque(maxlen=motion_buffer_size)
         self.orig_frames = deque(maxlen=motion_buffer_size)
+        self.motion_detection = Motion_Detection()
         self.bg_sum = None
         self.color_movement = None
         self.detection = None
@@ -45,7 +48,7 @@ class ImageProcessing:
         return cv2.resize(
             image,
             (int(image.shape[1] * coefficient), int(image.shape[0] * coefficient)),
-            interpolation=cv2.INTER_CUBIC,
+            cv2.INTER_CUBIC,
         )
 
     def resize_image_rgb(self, image, coefficient):
@@ -123,10 +126,13 @@ class ImageProcessing:
         movement[movement > 0] = 254
 
         self.detection = self.resize_cv(
-            movement, self.compression_ratio / self.scale_ratio
+            movement,
+            self.compression_ratio / self.scale_ratio,
         )
 
-        return self.color_movement
+        boxes = self.motion_detection.find_boxes(self.detection)
+
+        return image, movement, self.detection, boxes
 
     def calc_weighted_movement_average(self, movement_shape):
         weighted_sum = np.zeros(movement_shape, dtype="float32")
