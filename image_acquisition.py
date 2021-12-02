@@ -6,11 +6,11 @@
 import cv2
 
 def get_image():
-        cap = cv2.VideoCapture('http://216.197.229.166:1024/img/video.mjpeg')
+        cap = cv2.VideoCapture('http://218.157.155.140:81/mjpg/video.mjpg')
 
         while (True):
             ret, frame = cap.read()
-            # cv2.imwrite("images/IPcam.png", frame)
+            cv2.imwrite("images/IPcam.png", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break 
             cap.release()

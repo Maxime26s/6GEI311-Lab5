@@ -18,7 +18,6 @@ from image_acquisition import get_image
 import send_alert
 
 
-image_processing = ImageProcessing(diff_threshold=20)
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
 class Options(tk.Toplevel):
@@ -169,12 +168,14 @@ class Options(tk.Toplevel):
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
+        self.image_processing = ImageProcessing(diff_threshold=20)
         self.path = "./camT.mp4"
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
         self.count = 0
         self.thread = None
+        self.change_video = False
         self.last_frame_time = time()
         self.vs = FileVideoStream(self.path).start()
         # self.vs = VideoStream(src=0).start()
@@ -225,11 +226,13 @@ class Interface(tk.Tk):
 
     # Fonction de sélection de fichier
     def select_file(self):
-        image_processing = ImageProcessing()
+        self.image_processing = ImageProcessing(diff_threshold=20)
         Tk().withdraw()
         fileName = askopenfilename()
         self.path = fileName
         self.vs = FileVideoStream(self.path).start()
+        self.change_video = True
+        self.thread.join()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
         return
@@ -239,12 +242,8 @@ class Interface(tk.Tk):
         motion_filter.geometry("+1000+100")
         motion_filter.title("Motion Filter")
 
-        
         self.label = tk.Label(motion_filter, image=self.image)
-        self.label.grid(row=0, columnspan=5, padx=10,pady=10)
-        
-
-        
+        self.label.grid(row=0, columnspan=5, padx=10,pady=10)    
 
     def open_stat(self):
         stat = tk.Toplevel()
@@ -256,7 +255,7 @@ class Interface(tk.Tk):
         window.grab_set()
 
     def video_loop(self):
-        while True:
+        while self.change_video == False:
             while time() <= self.last_frame_time + 1 / 30:
                 pass
             self.last_frame_time = time()
@@ -268,7 +267,7 @@ class Interface(tk.Tk):
                 break
 
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image, motion, detection, boxes = image_processing.process_image1(image)
+            image, motion, detection, boxes = self.image_processing.process_image1(image)
             image = Image.fromarray(image.astype("uint8"))
             motion = Image.fromarray(motion.astype("uint8"))
             detection = Image.fromarray(detection.astype("uint8"))
@@ -277,18 +276,24 @@ class Interface(tk.Tk):
             # image = image.resize(
             #    (960, int(float(image.size[1]) * float(960 / float(image.size[0]))))
             # )
+
             for box in boxes:
                 detection = self.draw_rectangle(detection, box)
                 box.resize(detection.size[0], image.size[0])
                 image = self.draw_rectangle(image, box)
-            detection = Image.fromarray(
+            size = (800,600)
+
+            # if len(boxes) >= 1:
+
+            image = Image.fromarray(
                 cv2.resize(
-                    np.asarray(detection),
-                    image.size,
+                    np.asarray(image),
+                    size,
                     cv2.INTER_CUBIC,
                 ).astype("uint8")
             )
             self.display_image(image)
+        self.change_video == False
 
     def display_image(self, image1):
         self.image = ImageTk.PhotoImage(image1)
