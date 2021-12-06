@@ -18,7 +18,22 @@ from image_acquisition import get_image
 import send_alert
 import performance_statistics
 
-image_processing = ImageProcessing(diff_threshold=20)
+# https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__(self, *args, **kwargs):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
+
+
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
 class Options(tk.Toplevel):
@@ -184,6 +199,7 @@ class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
         self.path = "./cam2.mp4"
+        self.image_processing = ImageProcessing()
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
@@ -192,7 +208,7 @@ class Interface(tk.Tk):
         self.last_frame_time = time()
         self.vs = FileVideoStream(self.path).start()
         # self.vs = VideoStream(src=0).start()
-        self.thread = threading.Thread(target=self.video_loop, args=())
+        self.thread = StoppableThread(target=self.video_loop, args=())
         self.thread.daemon = True
         self.thread.start()
 
@@ -240,12 +256,15 @@ class Interface(tk.Tk):
 
     # Fonction de sélection de fichier
     def select_file(self):
-        image_processing = ImageProcessing()
+        self.thread.stop()
+        self.thread.join(timeout=0.05)
+        self.image_processing = ImageProcessing(diff_threshold=20)
         Tk().withdraw()
         fileName = askopenfilename()
         self.path = fileName
         self.vs = FileVideoStream(self.path).start()
-        self.thread = threading.Thread(target=self.video_loop, args=())
+        self.thread = StoppableThread(target=self.video_loop, args=())
+        self.thread.daemon = True
         self.thread.start()
         return
 
@@ -267,24 +286,23 @@ class Interface(tk.Tk):
         window.grab_set()
 
     def video_loop(self):
-        while True:
+        while not self.thread.stopped():
             # while time() <= self.last_frame_time + 1 / 30:
             # pass
             self.last_frame_time = time()
             self.frame = self.vs.read()
             # self.frame = get_image()
-            image = Image.fromarray(self.frame)
-            # image.save("images/IPcam.png")
             if self.frame is None:
                 break
-
+            image = Image.fromarray(self.frame)
+            # image.save("images/IPcam.png")
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image, motion, detection, boxes = image_processing.process_image(image)
+            image, motion, detection, boxes = self.image_processing.process_image(image)
             image = Image.fromarray(image.astype("uint8"))
             motion = Image.fromarray(motion.astype("uint8"))
             detection = Image.fromarray(detection.astype("uint8"))
-            # image = image_processing.resize_cv(image, 1920 / image.shape[1])
-            # image = Image.fromarray(image_processing.detection.astype("uint8"))
+            # image = self.image_processing.resize_cv(image, 1920 / image.shape[1])
+            # image = Image.fromarray(self.image_processing.detection.astype("uint8"))
             # image = image.resize(
             #    (960, int(float(image.size[1]) * float(960 / float(image.size[0]))))
             # )
@@ -333,3 +351,5 @@ if __name__ == "__main__":
     root = Interface()
     root.title("Motion detection")
     root.mainloop()
+    root.thread.stop()
+    root.thread.join(timeout=0.05)

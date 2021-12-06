@@ -30,7 +30,7 @@ class ImageProcessing:
         self.bg_buffer = deque(maxlen=bg_buffer_size)
         self.motion_buffer = deque(maxlen=motion_buffer_size)
         self.orig_frames = deque(maxlen=motion_buffer_size)
-        self.motion_detection = Motion_Detection()
+        self.motion_detection = Motion_Detection(min_size_ratio=0.001)
         self.bg_sum = None
         self.color_movement = None
         self.detection = None
