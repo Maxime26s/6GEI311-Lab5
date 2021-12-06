@@ -5,14 +5,12 @@ import numpy as np
 
 
 class Motion_Detection:
-    def __init__(self, step=1, min_size=-1):
+    def __init__(self, step=1, min_size_ratio=0.001):
         self.step = step
-        self.min_size = min_size
+        self.min_size_ratio = min_size_ratio
 
     def find_boxes(self, image):
-        min = self.min_size
-        if min == -1:
-            min = image.size * 0.001
+        min = image.size * self.min_size_ratio
         contours = measure.find_contours(
             image, fully_connected="low", positive_orientation="low"
         )

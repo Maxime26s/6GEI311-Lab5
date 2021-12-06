@@ -7,8 +7,8 @@ import cv2
 from PIL import Image, ImageDraw
 from scipy.signal import convolve2d
 from skimage import measure
-
 from motion_detection import Motion_Detection, Box, Point
+import performance_statistics
 
 
 class ImageProcessing:
@@ -34,6 +34,8 @@ class ImageProcessing:
         self.bg_sum = None
         self.color_movement = None
         self.detection = None
+
+        performance_statistics.reset_module()
 
     def testGaussian(self, image):
         img = []
@@ -101,27 +103,41 @@ class ImageProcessing:
     def rgb2gray(self, image):
         return np.mean(image, -1)
 
-    def process_image1(self, image):
+    def process_image(self, image):
+        a = time()
         img = self.prepare_image(image)
         img_float = img.astype("float32")
+        b = time()
+        performance_statistics.add_stat("image preparation", b - a)
 
+        a = time()
         self.add_to_background(img_float)
         self.motion_buffer.append(img_float)
+        b = time()
+        performance_statistics.add_stat("image buffers", b - a)
 
+        a = time()
         background_average = self.calc_background_average()
+        b = time()
+        performance_statistics.add_stat("background average", b - a)
+
         a = time()
         movement_average = self.calc_weighted_movement_average(img_float.shape)
         b = time()
-        # print(b - a)
+        performance_statistics.add_stat("weighted movement average", b - a)
 
+        a = time()
         if len(self.bg_buffer):
             movement = self.substract_image(movement_average, background_average)
         else:
             movement = np.zeros(movement_average.shape)
         self.color_movement = movement
-
         self.apply_diff_threshold(movement)
         movement = movement.astype("uint8")
+        b = time()
+        performance_statistics.add_stat("image substraction", b - a)
+
+        a = time()
         movement = self.rgb2gray(movement)
         movement[movement > 0] = 254
 
@@ -131,6 +147,8 @@ class ImageProcessing:
         )
 
         boxes = self.motion_detection.find_boxes(self.detection)
+        b = time()
+        performance_statistics.add_stat("motion area detection", b - a)
 
         return image, movement, self.detection, boxes
 

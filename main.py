@@ -1,4 +1,4 @@
-# pip install -r requirements.txt 
+# pip install -r requirements.txt
 import tkinter
 import numpy as np
 from tkinter import *
@@ -13,19 +13,17 @@ from image_processing import ImageProcessing
 import cv2
 from imutils.video import FileVideoStream, VideoStream
 import threading
-import time
+from time import time
 from image_acquisition import get_image
 import send_alert
+import performance_statistics
 
-
-
+image_processing = ImageProcessing(diff_threshold=20)
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
-image_processing = ImageProcessing(diff_threshold=20)
-
 class Options(tk.Toplevel):
     def __init__(self, parent):
-        #super().__init__(parent)  # no need it
+        # super().__init__(parent)  # no need it
         self.notebook = ttk.Notebook(parent)
         self.notebook.grid(row=1, column=0)
 
@@ -41,14 +39,14 @@ class Options(tk.Toplevel):
         self.option.geometry("+1000+600")
         self.option.title("Options")
         self.tab = ttk.Notebook(self.option)  # Création du système d'onglets
-        self.t1 = ttk.Frame(self.tab)  
-        self.t2 = ttk.Frame(self.tab)  
+        self.t1 = ttk.Frame(self.tab)
+        self.t2 = ttk.Frame(self.tab)
         self.t3 = ttk.Frame(self.tab)
-        self.t4 = ttk.Frame(self.tab) 
+        self.t4 = ttk.Frame(self.tab)
         self.t5 = ttk.Frame(self.tab)
-        self.tab.add(self.t1, text="General") 
+        self.tab.add(self.t1, text="General")
         self.tab.add(self.t2, text="Resize")
-        self.tab.add(self.t3, text="Gaussian blur")  
+        self.tab.add(self.t3, text="Gaussian blur")
         self.tab.add(self.t4, text="Bg buffer")
         self.tab.add(self.t5, text="Motion buffer")
         self.tab.pack(expand=1, fill="both")
@@ -64,16 +62,20 @@ class Options(tk.Toplevel):
 
     def add_tab1(self):
         self.l0 = Label(self.t1, text="Threshold", anchor="w")
-        self.l0.grid(row=0, column=0, padx=10, pady=(15,10))
+        self.l0.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.ent0 = Entry(self.t1, textvariable=self.threshold, width=21)  # font=(,'Terminal',30))
+        self.ent0 = Entry(
+            self.t1, textvariable=self.threshold, width=21
+        )  # font=(,'Terminal',30))
         self.ent0.place(width=150, height=50)
         self.ent0.grid(row=0, column=1, pady=5, padx=10)
 
         self.l1 = Label(self.t1, text="Framerate", anchor="w")
         self.l1.grid(row=1, column=0, padx=10, pady=10)
 
-        self.ent1 = Entry(self.t1, textvariable=self.framerate, width=21)  # font=(,'Terminal',30))
+        self.ent1 = Entry(
+            self.t1, textvariable=self.framerate, width=21
+        )  # font=(,'Terminal',30))
         self.ent1.place(width=150, height=50)
         self.ent1.grid(row=1, column=1, pady=5, padx=10)
 
@@ -84,23 +86,27 @@ class Options(tk.Toplevel):
         vlist = ["CV2"]
 
         self.l1 = Label(self.t2, text="Algorithme", anchor="w")
-        self.l1.grid(row=0, column=0, padx=10, pady=(15,10))
+        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t2, values = vlist)
+        self.combo = ttk.Combobox(self.t2, values=vlist)
         self.combo.set("Pick an algo")
-        self.combo.grid(row=0, column=1,padx = 5, pady = 5)
+        self.combo.grid(row=0, column=1, padx=5, pady=5)
 
         self.l1 = Label(self.t2, text="Scale ratio", anchor="w")
-        self.l1.grid(row=1, column=0, padx=10, pady=(15,10))
+        self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent2 = Entry(self.t2, textvariable=self.scale_ratio, width=21)  # font=(,'Terminal',30))
+        self.ent2 = Entry(
+            self.t2, textvariable=self.scale_ratio, width=21
+        )  # font=(,'Terminal',30))
         self.ent2.place(width=150, height=50)
         self.ent2.grid(row=1, column=1, pady=5, padx=10)
 
         self.l2 = Label(self.t2, text="Compression", anchor="w")
         self.l2.grid(row=2, column=0, padx=10, pady=10)
 
-        self.ent3 = Entry(self.t2, textvariable=self.compression_ratio, width=21)  # font=(,'Terminal',30))
+        self.ent3 = Entry(
+            self.t2, textvariable=self.compression_ratio, width=21
+        )  # font=(,'Terminal',30))
         self.ent3.place(width=150, height=50)
         self.ent3.grid(row=2, column=1, pady=5, padx=10)
 
@@ -111,16 +117,18 @@ class Options(tk.Toplevel):
         vlist = ["CV2"]
 
         self.l1 = Label(self.t3, text="Algorithme", anchor="w")
-        self.l1.grid(row=0, column=0, padx=10, pady=(15,10))
+        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t3, values = vlist)
+        self.combo = ttk.Combobox(self.t3, values=vlist)
         self.combo.set("Pick an algo")
-        self.combo.grid(row=0, column=1,padx = 5, pady = 5)
+        self.combo.grid(row=0, column=1, padx=5, pady=5)
 
         self.l2 = Label(self.t3, text="Kernel size", anchor="w")
-        self.l2.grid(row=1, column=0, padx=10, pady=(15,10))
+        self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent4 = Entry(self.t3, textvariable=self.kernel_size, width=21)  # font=(,'Terminal',30))
+        self.ent4 = Entry(
+            self.t3, textvariable=self.kernel_size, width=21
+        )  # font=(,'Terminal',30))
         self.ent4.place(width=150, height=50)
         self.ent4.grid(row=1, column=1, pady=5, padx=10)
 
@@ -131,16 +139,18 @@ class Options(tk.Toplevel):
         vlist = ["CV2"]
 
         self.l1 = Label(self.t4, text="Algorithme", anchor="w")
-        self.l1.grid(row=0, column=0, padx=10, pady=(15,10))
+        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t4, values = vlist)
+        self.combo = ttk.Combobox(self.t4, values=vlist)
         self.combo.set("Pick an algo")
-        self.combo.grid(row=0, column=1,padx = 5, pady = 5)
+        self.combo.grid(row=0, column=1, padx=5, pady=5)
 
         self.l2 = Label(self.t4, text="Buffer size", anchor="w")
-        self.l2.grid(row=1, column=0, padx=10, pady=(15,10))
+        self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent5 = Entry(self.t4, textvariable=self.bg_buffer_size, width=21)  # font=(,'Terminal',30))
+        self.ent5 = Entry(
+            self.t4, textvariable=self.bg_buffer_size, width=21
+        )  # font=(,'Terminal',30))
         self.ent5.place(width=150, height=50)
         self.ent5.grid(row=1, column=1, pady=5, padx=10)
 
@@ -151,16 +161,18 @@ class Options(tk.Toplevel):
         vlist = ["CV2"]
 
         self.l1 = Label(self.t5, text="Algorithme", anchor="w")
-        self.l1.grid(row=0, column=0, padx=10, pady=(15,10))
+        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t5, values = vlist)
+        self.combo = ttk.Combobox(self.t5, values=vlist)
         self.combo.set("Pick an algo")
-        self.combo.grid(row=0, column=1,padx = 5, pady = 5)
+        self.combo.grid(row=0, column=1, padx=5, pady=5)
 
         self.l2 = Label(self.t5, text="Buffer size", anchor="w")
-        self.l2.grid(row=1, column=0, padx=10, pady=(15,10))
+        self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent6 = Entry(self.t5, textvariable=self.motion_buffer_size, width=21)  # font=(,'Terminal',30))
+        self.ent6 = Entry(
+            self.t5, textvariable=self.motion_buffer_size, width=21
+        )  # font=(,'Terminal',30))
         self.ent6.place(width=150, height=50)
         self.ent6.grid(row=1, column=1, pady=5, padx=10)
 
@@ -171,19 +183,17 @@ class Options(tk.Toplevel):
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
-        image_processing = ImageProcessing(diff_threshold=20)
-        self.path = "./camT2.mp4"
+        self.path = "./cam2.mp4"
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
         self.count = 0
         self.thread = None
-        self.alert_sent = False
-        # self.change_video = False
-        self.last_frame_time = time.time()
+        self.last_frame_time = time()
         self.vs = FileVideoStream(self.path).start()
         # self.vs = VideoStream(src=0).start()
         self.thread = threading.Thread(target=self.video_loop, args=())
+        self.thread.daemon = True
         self.thread.start()
 
     # Création de boutons
@@ -191,7 +201,7 @@ class Interface(tk.Tk):
         button1 = Button(
             self,
             text="Source",
-            width = 10,
+            width=10,
             command=partial(self.select_file),
         )
         button1.grid(row=1, column=0, padx=5, pady=5)
@@ -199,7 +209,7 @@ class Interface(tk.Tk):
         button2 = Button(
             self,
             text="Motion filter",
-            width = 10,
+            width=10,
             command=partial(self.open_motiom_filter),
         )
         button2.grid(row=1, column=1, padx=5, pady=5)
@@ -207,7 +217,7 @@ class Interface(tk.Tk):
         button3 = Button(
             self,
             text="Stats",
-            width = 10,
+            width=10,
             command=partial(self.open_stat),
         )
         button3.grid(row=1, column=2, padx=5, pady=5)
@@ -215,7 +225,7 @@ class Interface(tk.Tk):
         button4 = Button(
             self,
             text="Options",
-            width = 10,
+            width=10,
             command=partial(self.open_options),
         )
         button4.grid(row=1, column=3, padx=5, pady=5)
@@ -223,10 +233,10 @@ class Interface(tk.Tk):
         button5 = Button(
             self,
             text="Help",
-            width = 10,
+            width=10,
             # command=partial(self.open_help),
         )
-        button5.grid(row=1, column=4, padx=5, pady=5)       
+        button5.grid(row=1, column=4, padx=5, pady=5)
 
     # Fonction de sélection de fichier
     def select_file(self):
@@ -235,8 +245,6 @@ class Interface(tk.Tk):
         fileName = askopenfilename()
         self.path = fileName
         self.vs = FileVideoStream(self.path).start()
-        # self.change_video = True
-        # self.thread.join()
         self.thread = threading.Thread(target=self.video_loop, args=())
         self.thread.start()
         return
@@ -246,8 +254,8 @@ class Interface(tk.Tk):
         motion_filter.geometry("+1000+100")
         motion_filter.title("Motion Filter")
 
-        self.label = tk.Label(motion_filter, image=self.detection)
-        self.label.grid(row=0, columnspan=5, padx=10,pady=10)    
+        self.label = tk.Label(motion_filter, image=self.image)
+        self.label.grid(row=0, columnspan=5, padx=10, pady=10)
 
     def open_stat(self):
         stat = tk.Toplevel()
@@ -260,17 +268,18 @@ class Interface(tk.Tk):
 
     def video_loop(self):
         while True:
-            while time.time() <= self.last_frame_time + 1 / 30:
-                pass
-            self.last_frame_time = time.time()
+            # while time() <= self.last_frame_time + 1 / 30:
+            # pass
+            self.last_frame_time = time()
             self.frame = self.vs.read()
             # self.frame = get_image()
-            
+            image = Image.fromarray(self.frame)
+            # image.save("images/IPcam.png")
             if self.frame is None:
                 break
 
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image, motion, detection, boxes = image_processing.process_image1(image)
+            image, motion, detection, boxes = image_processing.process_image(image)
             image = Image.fromarray(image.astype("uint8"))
             motion = Image.fromarray(motion.astype("uint8"))
             detection = Image.fromarray(detection.astype("uint8"))
@@ -279,36 +288,25 @@ class Interface(tk.Tk):
             # image = image.resize(
             #    (960, int(float(image.size[1]) * float(960 / float(image.size[0]))))
             # )
-
             for box in boxes:
                 detection = self.draw_rectangle(detection, box)
                 box.resize(detection.size[0], image.size[0])
                 image = self.draw_rectangle(image, box)
-            size = (int(image.size[0] / 2), int(image.size[1] / 2))
-
-            image = Image.fromarray(
+            detection = Image.fromarray(
                 cv2.resize(
-                    np.asarray(image),
-                    size,
+                    np.asarray(detection),
+                    image.size,
                     cv2.INTER_CUBIC,
                 ).astype("uint8")
             )
             self.display_image(image)
-
-            if len(boxes) >= 2 and self.alert_sent == False:
-                image.save("images/IPcam.png")
-                # thread_send_email = threading.Thread(target=lambda: send_alert.send_email())
-                # thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms())
-                # thread_send_email.start()
-                # thread_send_sms.start()
-                self.alert_sent = True
 
     def display_image(self, image1):
         self.image = ImageTk.PhotoImage(image1)
 
         if self.label is None:
             self.label = tk.Label(image=self.image)
-            self.label.grid(row=0, columnspan=5, padx=10,pady=10)
+            self.label.grid(row=0, columnspan=5, padx=10, pady=10)
         else:
             self.label.configure(image=self.image)
         self.label.image = self.image
@@ -329,6 +327,7 @@ class Interface(tk.Tk):
     # Fonction pour fermer l'application
     def quit(self):
         self.master.destroy()
+
 
 if __name__ == "__main__":
     root = Interface()
