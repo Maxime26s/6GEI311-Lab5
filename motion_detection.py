@@ -24,30 +24,7 @@ class Motion_Detection:
             boxes.append(box)
 
         if self.shouldCombine:
-            combined = True
-            while combined == True:
-                combined = False
-                for box1 in boxes:
-                    if box1 != None:
-                        for j, box2 in enumerate(boxes):
-                            if (
-                                box2 != None
-                                and box1 != box2
-                                and (
-                                    box1.contains(box2.p1.x, box2.p1.y)
-                                    or box1.contains(box2.p2.x, box2.p2.y)
-                                )
-                            ):
-                                combined = True
-                                box1.p1 = Point(
-                                    min_val(box1.p1.x, box2.p1.x),
-                                    min_val(box1.p1.y, box2.p1.y),
-                                )
-                                box1.p2 = Point(
-                                    max_val(box1.p2.x, box2.p2.x),
-                                    max_val(box1.p2.y, box2.p2.y),
-                                )
-                                boxes[j] = None
+            boxes = self.combine(boxes)
 
         final_boxes = []
         for box in boxes:
@@ -55,6 +32,33 @@ class Motion_Detection:
                 final_boxes.append(box)
 
         return final_boxes
+
+    def combine(self, boxes):
+        combined = True
+        while combined == True:
+            combined = False
+            for box1 in boxes:
+                if box1 != None:
+                    for j, box2 in enumerate(boxes):
+                        if (
+                            box2 != None
+                            and box1 != box2
+                            and (
+                                box1.contains(box2.p1.x, box2.p1.y)
+                                or box1.contains(box2.p2.x, box2.p2.y)
+                            )
+                        ):
+                            combined = True
+                            box1.p1 = Point(
+                                min_val(box1.p1.x, box2.p1.x),
+                                min_val(box1.p1.y, box2.p1.y),
+                            )
+                            box1.p2 = Point(
+                                max_val(box1.p2.x, box2.p2.x),
+                                max_val(box1.p2.y, box2.p2.y),
+                            )
+                            boxes[j] = None
+        return boxes
 
 
 class Point:
