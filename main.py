@@ -14,6 +14,8 @@ import threading
 from time import time
 from image_acquisition import get_image
 import send_alert
+import performance_statistics
+
 
 # https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread
 class StoppableThread(threading.Thread):
@@ -215,19 +217,29 @@ class Options(tk.Toplevel):
         self.ent7.place(width=150, height=50)
         self.ent7.grid(row=1, column=1, pady=5, padx=10)
 
+        self.l2 = Label(self.t5, text="Combine", anchor="w")
+        self.l2.grid(row=2, column=0, padx=10, pady=(15, 10))
+
+        self.ent8 = Checkbutton(
+            self.t5, variable=self.shouldCombine, onvalue=True, offvalue=False, width=21
+        )  # font=(,'Terminal',30))
+        self.ent8.place(width=150, height=50)
+        self.ent8.grid(row=2, column=1, pady=5, padx=10)
+
         button = Button(self.t5, text="Confirm", padx=24, command=self.confirm_options)
-        button.grid(row=2, columnspan=2, padx=5, pady=5)
+        button.grid(row=3, columnspan=2, padx=5, pady=5)
 
 
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
-        self.path = "./cam2.mp4"
+        self.path = "./camT2.mp4"
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
         self.count = 0
         self.thread = None
+        self.alert_sent = False
         self.last_frame_time = time()
         self.vs = FileVideoStream(self.path).start()
         self.options = None
@@ -297,6 +309,8 @@ class Interface(tk.Tk):
         stat = tk.Toplevel()
         stat.geometry("+1000+350")
         stat.title("Statistiques")
+        list_stat = performance_statistics.stats
+
 
     def open_options(self):
         self.options = Options(self, self.options, self.restart_thread)
@@ -308,8 +322,8 @@ class Interface(tk.Tk):
                 while time() <= self.last_frame_time + 1 / self.options.framerate.get():
                     pass
             self.last_frame_time = time()
-            self.frame = self.vs.read()
-            # self.frame = get_image()
+            # self.frame = self.vs.read()
+            self.frame = get_image()
             if self.frame is None:
                 break
             image = Image.fromarray(self.frame)
@@ -336,6 +350,14 @@ class Interface(tk.Tk):
                 ).astype("uint8")
             )
             self.display_image(image)
+
+            if len(boxes) >= 1 and self.alert_sent == False:
+                image.save("images/IPcam.png")
+                # thread_send_email = threading.Thread(target=lambda: send_alert.send_email())
+                # thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms())
+                # thread_send_email.start()
+                # thread_send_sms.start()
+                self.alert_sent = True
 
     def display_image(self, image1):
         self.image = ImageTk.PhotoImage(image1)
