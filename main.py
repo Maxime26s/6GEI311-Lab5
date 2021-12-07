@@ -4,9 +4,7 @@ import numpy as np
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-import tkinter.font as font
 from functools import partial
-import math
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk, ImageDraw
 from image_processing import ImageProcessing
@@ -16,7 +14,6 @@ import threading
 from time import time
 from image_acquisition import get_image
 import send_alert
-import performance_statistics
 
 # https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread
 class StoppableThread(threading.Thread):

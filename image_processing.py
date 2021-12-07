@@ -1,13 +1,9 @@
-import math
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
 from collections import deque
 from time import time
 import cv2
-from PIL import Image, ImageDraw
 from scipy.signal import convolve2d
-from skimage import measure
-from motion_detection import Motion_Detection, Box, Point
+from motion_detection import Motion_Detection
 import performance_statistics
 
 
