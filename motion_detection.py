@@ -9,6 +9,7 @@ class Motion_Detection:
         self.shouldCombine = shouldCombine
         self.min_size_ratio = min_size_ratio
 
+    # Trouve les objets en mouvements
     def find_boxes(self, image):
         min = image.size * self.min_size_ratio
         contours = measure.find_contours(image)
@@ -74,7 +75,6 @@ class Box:
 
     def check_point(self, image, x, y):
         size = image.shape
-        # value = image[x][y]
         if x >= 0 and x < size[1] and y >= 0 and y < size[0] and image[y][x] == 127:
             self.p1.x = min_val(self.p1.x, x)
             self.p1.y = min_val(self.p1.y, y)

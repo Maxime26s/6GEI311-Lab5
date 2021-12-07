@@ -226,7 +226,6 @@ class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
         self.path = "./cam2.mp4"
-        self.image_processing = ImageProcessing()
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
@@ -236,9 +235,7 @@ class Interface(tk.Tk):
         self.vs = FileVideoStream(self.path).start()
         self.options = None
         # self.vs = VideoStream(src=0).start()
-        self.thread = StoppableThread(target=self.video_loop, args=())
-        self.thread.daemon = True
-        self.thread.start()
+        self.start_thread()
 
     # Création de boutons
     def create_main(self):
@@ -290,26 +287,6 @@ class Interface(tk.Tk):
         self.path = fileName
         self.vs = FileVideoStream(self.path).start()
         self.start_thread()
-
-    def stop_thread(self):
-        self.thread.stop()
-        self.thread.join(timeout=0.05)
-
-    def start_thread(self):
-        self.image_processing = ImageProcessing(
-            self.options.threshold.get(),
-            self.options.scale_ratio.get(),
-            self.options.compression_ratio.get(),
-            self.options.bg_buffer_size.get(),
-            self.options.motion_buffer_size.get(),
-            self.options.kernel_size.get(),
-            self.options.gaussian_algo.get(),
-            self.options.min_size_ratio.get(),
-            self.options.shouldCombine.get(),
-        )
-        self.thread = StoppableThread(target=self.video_loop, args=())
-        self.thread.daemon = True
-        self.thread.start()
 
     def open_motiom_filter(self):
         motion_filter = tk.Toplevel()
@@ -385,6 +362,29 @@ class Interface(tk.Tk):
     def restart_thread(self):
         self.stop_thread()
         self.start_thread()
+
+    def stop_thread(self):
+        self.thread.stop()
+        self.thread.join(timeout=0.05)
+
+    def start_thread(self):
+        if self.options != None:
+            self.image_processing = ImageProcessing(
+                self.options.threshold.get(),
+                self.options.scale_ratio.get(),
+                self.options.compression_ratio.get(),
+                self.options.bg_buffer_size.get(),
+                self.options.motion_buffer_size.get(),
+                self.options.kernel_size.get(),
+                self.options.gaussian_algo.get(),
+                self.options.min_size_ratio.get(),
+                self.options.shouldCombine.get(),
+            )
+        else:
+            self.image_processing = ImageProcessing()
+        self.thread = StoppableThread(target=self.video_loop, args=())
+        self.thread.daemon = True
+        self.thread.start()
 
     # Fonction pour fermer l'application
     def quit(self):

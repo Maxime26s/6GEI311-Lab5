@@ -49,6 +49,7 @@ class ImageProcessing:
 
         performance_statistics.reset_module()
 
+    # Filtre le mouvement dans l'image
     def process_image(self, image):
         img = image
         a = time()
@@ -100,7 +101,8 @@ class ImageProcessing:
 
         return image, movement, self.detection, boxes
 
-    def testGaussian(self, image):
+    # Filtre gaussien
+    def custom_gaussian(self, image):
         img = []
         for d in range(3):
             img.append(
@@ -114,6 +116,7 @@ class ImageProcessing:
         im_conv = np.stack(img, axis=2).astype("uint8")
         return im_conv
 
+    # Resize une image selon un coefficient
     def resize_cv(self, image, coefficient):
         return cv2.resize(
             image,
@@ -121,18 +124,29 @@ class ImageProcessing:
             cv2.INTER_CUBIC,
         )
 
+    # Applique un filtre gaussien sur une image
     def gaussian_blur(self, image):
         img = image
+
+        # Un kernel doit être plus grand que 0 et impaire
+        if self.kernel <= 0:
+            self.kernel = 1
+        elif self.kernel % 2 == 0:
+            self.kernel = self.kernel + 1
+
         if self.gaussian_algo == "CV2":
             img = cv2.GaussianBlur(img, (self.kernel, self.kernel), 0)
         else:
-            img = self.testGaussian(img)
+            img = self.custom_gaussian(img)
+
         return img
 
+    # Valeur absolue de la soustraction de deux images
     def substract_image(self, img1, img2):
         diff = np.abs(img2 - img1)
         return diff
 
+    # Met l'image en noir et blanc selon le threshold
     def apply_diff_threshold(self, image):
         image[image < self.diff_threshold] = 0
         image[image >= self.diff_threshold] = 255
