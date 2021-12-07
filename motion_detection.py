@@ -33,6 +33,7 @@ class Motion_Detection:
 
         return final_boxes
 
+    # Combine les box qui se touchent
     def combine(self, boxes):
         combined = True
         while combined == True:
