@@ -37,18 +37,35 @@ class StoppableThread(threading.Thread):
 # https://www.pluralsight.com/guides/importing-image-data-into-numpy-arrays
 # Classe contenant l'application (tkinter)
 class Options(tk.Toplevel):
-    def __init__(self, parent):
+    def __init__(self, parent, oldOptions, confirm):
         # super().__init__(parent)  # no need it
         self.notebook = ttk.Notebook(parent)
         self.notebook.grid(row=1, column=0)
 
-        self.threshold = ""
-        self.framerate = ""
-        self.compression_ratio = ""
-        self.scale_ratio = ""
-        self.kernel_size = ""
-        self.bg_buffer_size = ""
-        self.motion_buffer_size = ""
+        self.confirm = confirm
+
+        self.threshold = tk.IntVar(value=20)
+        self.framerate = tk.IntVar(value=0)
+        self.compression_ratio = tk.DoubleVar(value=0.5)
+        self.scale_ratio = tk.DoubleVar(value=0.2)
+        self.kernel_size = tk.IntVar(value=5)
+        self.bg_buffer_size = tk.IntVar(value=10)
+        self.motion_buffer_size = tk.IntVar(value=2)
+        self.min_size_ratio = tk.DoubleVar(value=0.001)
+        self.shouldCombine = tk.BooleanVar(value=True)
+        self.gaussian_algo = tk.StringVar(value="CV2")
+
+        if oldOptions != None:
+            self.threshold.set(oldOptions.threshold.get())
+            self.framerate.set(oldOptions.framerate.get())
+            self.compression_ratio.set(oldOptions.compression_ratio.get())
+            self.scale_ratio.set(oldOptions.scale_ratio.get())
+            self.kernel_size.set(oldOptions.kernel_size.get())
+            self.bg_buffer_size.set(oldOptions.bg_buffer_size.get())
+            self.motion_buffer_size.set(oldOptions.motion_buffer_size.get())
+            self.min_size_ratio.set(oldOptions.min_size_ratio.get())
+            self.shouldCombine.set(oldOptions.shouldCombine.get())
+            self.gaussian_algo.set(oldOptions.gaussian_algo.get())
 
         self.option = tkinter.Toplevel()
         self.option.geometry("+1000+600")
@@ -62,8 +79,8 @@ class Options(tk.Toplevel):
         self.tab.add(self.t1, text="General")
         self.tab.add(self.t2, text="Resize")
         self.tab.add(self.t3, text="Gaussian blur")
-        self.tab.add(self.t4, text="Bg buffer")
-        self.tab.add(self.t5, text="Motion buffer")
+        self.tab.add(self.t4, text="Image buffer")
+        self.tab.add(self.t5, text="Detection")
         self.tab.pack(expand=1, fill="both")
 
         self.add_tab1()
@@ -73,7 +90,7 @@ class Options(tk.Toplevel):
         self.add_tab5()
 
     def confirm_options(self):
-        pass
+        self.confirm()
 
     def add_tab1(self):
         self.l0 = Label(self.t1, text="Threshold", anchor="w")
@@ -94,18 +111,18 @@ class Options(tk.Toplevel):
         self.ent1.place(width=150, height=50)
         self.ent1.grid(row=1, column=1, pady=5, padx=10)
 
-        button = Button(self.t1, text="Confirm", padx=24)
+        button = Button(self.t1, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=2, columnspan=2, padx=5, pady=5)
 
     def add_tab2(self):
-        vlist = ["CV2"]
+        # vlist = ["CV2"]
 
-        self.l1 = Label(self.t2, text="Algorithme", anchor="w")
-        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
+        # self.l1 = Label(self.t2, text="Algorithme", anchor="w")
+        # self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t2, values=vlist)
-        self.combo.set("Pick an algo")
-        self.combo.grid(row=0, column=1, padx=5, pady=5)
+        # self.combo = ttk.Combobox(self.t2, values=vlist)
+        # self.combo.set("Pick an algo")
+        # self.combo.grid(row=0, column=1, padx=5, pady=5)
 
         self.l1 = Label(self.t2, text="Scale ratio", anchor="w")
         self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
@@ -125,17 +142,19 @@ class Options(tk.Toplevel):
         self.ent3.place(width=150, height=50)
         self.ent3.grid(row=2, column=1, pady=5, padx=10)
 
-        button = Button(self.t2, text="Confirm", padx=24)
+        button = Button(self.t2, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=3, columnspan=2, padx=5, pady=5)
 
     def add_tab3(self):
-        vlist = ["CV2"]
+        vlist = ["CV2", "Custom"]
 
         self.l1 = Label(self.t3, text="Algorithme", anchor="w")
         self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t3, values=vlist)
-        self.combo.set("Pick an algo")
+        self.combo = ttk.Combobox(
+            self.t3, textvariable=self.gaussian_algo, values=vlist
+        )
+        self.combo.set("CV2")
         self.combo.grid(row=0, column=1, padx=5, pady=5)
 
         self.l2 = Label(self.t3, text="Kernel size", anchor="w")
@@ -147,20 +166,28 @@ class Options(tk.Toplevel):
         self.ent4.place(width=150, height=50)
         self.ent4.grid(row=1, column=1, pady=5, padx=10)
 
-        button = Button(self.t3, text="Confirm", padx=24)
+        button = Button(self.t3, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=2, columnspan=2, padx=5, pady=5)
 
     def add_tab4(self):
-        vlist = ["CV2"]
+        # vlist = ["CV2"]
 
-        self.l1 = Label(self.t4, text="Algorithme", anchor="w")
-        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
+        # self.l1 = Label(self.t4, text="Algorithme", anchor="w")
+        # self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t4, values=vlist)
-        self.combo.set("Pick an algo")
-        self.combo.grid(row=0, column=1, padx=5, pady=5)
+        # self.combo = ttk.Combobox(self.t4, values=vlist)
+        # self.combo.set("Pick an algo")
+        # self.combo.grid(row=0, column=1, padx=5, pady=5)
+        self.l1 = Label(self.t4, text="Motion Buffer size", anchor="w")
+        self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.l2 = Label(self.t4, text="Buffer size", anchor="w")
+        self.ent6 = Entry(
+            self.t4, textvariable=self.motion_buffer_size, width=21
+        )  # font=(,'Terminal',30))
+        self.ent6.place(width=150, height=50)
+        self.ent6.grid(row=1, column=1, pady=5, padx=10)
+
+        self.l2 = Label(self.t4, text="Background Buffer size", anchor="w")
         self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
 
         self.ent5 = Entry(
@@ -169,27 +196,27 @@ class Options(tk.Toplevel):
         self.ent5.place(width=150, height=50)
         self.ent5.grid(row=1, column=1, pady=5, padx=10)
 
-        button = Button(self.t4, text="Confirm", padx=24)
+        button = Button(self.t4, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=2, columnspan=2, padx=5, pady=5)
 
     def add_tab5(self):
-        vlist = ["CV2"]
+        # vlist = ["CV2"]
 
-        self.l1 = Label(self.t5, text="Algorithme", anchor="w")
-        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
+        # self.l1 = Label(self.t5, text="Algorithme", anchor="w")
+        # self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.combo = ttk.Combobox(self.t5, values=vlist)
-        self.combo.set("Pick an algo")
-        self.combo.grid(row=0, column=1, padx=5, pady=5)
+        # self.combo = ttk.Combobox(self.t5, values=vlist)
+        # self.combo.set("Pick an algo")
+        # self.combo.grid(row=0, column=1, padx=5, pady=5)
 
-        self.l2 = Label(self.t5, text="Buffer size", anchor="w")
-        self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
+        self.l1 = Label(self.t5, text="Min size ratio", anchor="w")
+        self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent6 = Entry(
-            self.t5, textvariable=self.motion_buffer_size, width=21
+        self.ent7 = Entry(
+            self.t5, textvariable=self.min_size_ratio, width=21
         )  # font=(,'Terminal',30))
-        self.ent6.place(width=150, height=50)
-        self.ent6.grid(row=1, column=1, pady=5, padx=10)
+        self.ent7.place(width=150, height=50)
+        self.ent7.grid(row=1, column=1, pady=5, padx=10)
 
         button = Button(self.t5, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=2, columnspan=2, padx=5, pady=5)
@@ -207,6 +234,7 @@ class Interface(tk.Tk):
         self.thread = None
         self.last_frame_time = time()
         self.vs = FileVideoStream(self.path).start()
+        self.options = None
         # self.vs = VideoStream(src=0).start()
         self.thread = StoppableThread(target=self.video_loop, args=())
         self.thread.daemon = True
@@ -256,17 +284,32 @@ class Interface(tk.Tk):
 
     # Fonction de sélection de fichier
     def select_file(self):
-        self.thread.stop()
-        self.thread.join(timeout=0.05)
-        self.image_processing = ImageProcessing(diff_threshold=20)
+        self.stop_thread()
         Tk().withdraw()
         fileName = askopenfilename()
         self.path = fileName
         self.vs = FileVideoStream(self.path).start()
+        self.start_thread()
+
+    def stop_thread(self):
+        self.thread.stop()
+        self.thread.join(timeout=0.05)
+
+    def start_thread(self):
+        self.image_processing = ImageProcessing(
+            self.options.threshold.get(),
+            self.options.scale_ratio.get(),
+            self.options.compression_ratio.get(),
+            self.options.bg_buffer_size.get(),
+            self.options.motion_buffer_size.get(),
+            self.options.kernel_size.get(),
+            self.options.gaussian_algo.get(),
+            self.options.min_size_ratio.get(),
+            self.options.shouldCombine.get(),
+        )
         self.thread = StoppableThread(target=self.video_loop, args=())
         self.thread.daemon = True
         self.thread.start()
-        return
 
     def open_motiom_filter(self):
         motion_filter = tk.Toplevel()
@@ -282,13 +325,14 @@ class Interface(tk.Tk):
         stat.title("Statistiques")
 
     def open_options(self):
-        window = Options(self)
-        window.grab_set()
+        self.options = Options(self, self.options, self.restart_thread)
+        self.options.grab_set()
 
     def video_loop(self):
         while not self.thread.stopped():
-            # while time() <= self.last_frame_time + 1 / 30:
-            # pass
+            if self.options != None and self.options.framerate.get() > 0:
+                while time() <= self.last_frame_time + 1 / self.options.framerate.get():
+                    pass
             self.last_frame_time = time()
             self.frame = self.vs.read()
             # self.frame = get_image()
@@ -331,16 +375,16 @@ class Interface(tk.Tk):
 
         self.count += 1
 
-    def resize(self, image, size=(1920, 1080)):
-        image = image.thumbnail(size, Image.ANTIALIAS)
-        return image
-
     def draw_rectangle(self, image, box):
         draw = ImageDraw.Draw(image)
         draw.rectangle(
             (box.p1.y, box.p1.x, box.p2.y, box.p2.x), fill=None, outline="red"
         )
         return image
+
+    def restart_thread(self):
+        self.stop_thread()
+        self.start_thread()
 
     # Fonction pour fermer l'application
     def quit(self):

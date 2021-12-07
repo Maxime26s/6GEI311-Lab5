@@ -4,21 +4,9 @@ import math
 import numpy as np
 
 
-def max_val(a, b):
-    if a >= b:
-        return a
-    return b
-
-
-def min_val(a, b):
-    if a <= b:
-        return a
-    return b
-
-
 class Motion_Detection:
-    def __init__(self, step=1, min_size_ratio=0.001):
-        self.step = step
+    def __init__(self, shouldCombine=True, min_size_ratio=0.001):
+        self.shouldCombine = shouldCombine
         self.min_size_ratio = min_size_ratio
 
     def find_boxes(self, image):
@@ -34,28 +22,31 @@ class Motion_Detection:
             box = Box(Point(Xmin, Ymin), Point(Xmax, Ymax))
             boxes.append(box)
 
-        combined = True
-        while combined == True:
-            combined = False
-            for i, box1 in enumerate(boxes):
-                for j, box2 in enumerate(boxes):
-                    if (
-                        box1 != None
-                        and box2 != None
-                        and box1 != box2
-                        and (
-                            box1.contains(box2.p1.x, box2.p1.y)
-                            or box1.contains(box2.p2.x, box2.p2.y)
-                        )
-                    ):
-                        combined = True
-                        box1.p1 = Point(
-                            min_val(box1.p1.x, box2.p1.x), min_val(box1.p1.y, box2.p1.y)
-                        )
-                        box1.p2 = Point(
-                            max_val(box1.p2.x, box2.p2.x), max_val(box1.p2.y, box2.p2.y)
-                        )
-                        boxes[j] = None
+        if self.shouldCombine:
+            combined = True
+            while combined == True:
+                combined = False
+                for box1 in boxes:
+                    if box1 != None:
+                        for j, box2 in enumerate(boxes):
+                            if (
+                                box2 != None
+                                and box1 != box2
+                                and (
+                                    box1.contains(box2.p1.x, box2.p1.y)
+                                    or box1.contains(box2.p2.x, box2.p2.y)
+                                )
+                            ):
+                                combined = True
+                                box1.p1 = Point(
+                                    min_val(box1.p1.x, box2.p1.x),
+                                    min_val(box1.p1.y, box2.p1.y),
+                                )
+                                box1.p2 = Point(
+                                    max_val(box1.p2.x, box2.p2.x),
+                                    max_val(box1.p2.y, box2.p2.y),
+                                )
+                                boxes[j] = None
 
         final_boxes = []
         for box in boxes:
@@ -63,73 +54,6 @@ class Motion_Detection:
                 final_boxes.append(box)
 
         return final_boxes
-
-        boxes = []
-        y = 0
-        x = 0.0
-        while y < image.shape[0]:
-            while x < image.shape[1]:
-                for box in boxes:
-                    if box.contains(x, y):
-                        x = box.p2.x + 1
-                        break
-                if x < image.shape[1]:
-                    if image[y][x] >= 127:
-                        value = image[y][x]
-                        box = self.find_box(image, x, y)
-                        if box.size() >= self.min_size:
-                            boxes.append(box)
-                x += 1
-            x = 0
-            y += 1
-        return boxes
-
-    def find_box(self, image, x, y):
-        box = Box(Point(x, y))
-        box = self.find_neighbors(image, box, x, y, True)
-        box = self.find_neighbors(image, box, x, y, False)
-        return box
-
-    def find_neighbors(self, image, box, x, y, left):
-        # if x < image.shape[0] - 1 and y < image.shape[1] - 1:
-        # arr = np.array(
-        #    [
-        #        [
-        #            image[x - self.step, y - self.step],
-        #            image[x, y - self.step],
-        #            image[x + self.step, y - self.step],
-        #        ],
-        #        [image[x - self.step, y], image[x, y], image[x + self.step, y]],
-        #        [
-        #            image[x - self.step, y + self.step],
-        #            image[x, y + self.step],
-        #            image[x + self.step, y + self.step],
-        #        ],
-        #    ]
-        # )
-        # print(arr)
-
-        if left:
-            if box.check_point(image, x - self.step, y - self.step):
-                box = self.find_neighbors(
-                    image, box, x - self.step, y - self.step, True
-                )
-            else:
-                if box.check_point(image, x - self.step, y):
-                    box = self.find_neighbors(image, box, x - self.step, y, True)
-                if box.check_point(image, x, y - self.step):
-                    box = self.find_neighbors(image, box, x, y - self.step, True)
-        else:
-            if box.check_point(image, x + self.step, y + self.step):
-                box = self.find_neighbors(
-                    image, box, x + self.step, y + self.step, False
-                )
-            else:
-                if box.check_point(image, x + self.step, y):
-                    box = self.find_neighbors(image, box, x + self.step, y, False)
-                if box.check_point(image, x, y + self.step):
-                    box = self.find_neighbors(image, box, x, y + self.step, False)
-        return box
 
 
 class Point:
@@ -174,9 +98,13 @@ class Box:
         self.p2.resize(ratio)
 
 
-if __name__ == "__main__":
-    arr = np.array([[0, 0, 0, 0], [0, 255, 255, 255], [0, 0, 255, 255]])
-    print(arr.shape)
-    motion_detection = Motion_Detection()
-    boxes = motion_detection.find_boxes(arr)
-    print(boxes)
+def max_val(a, b):
+    if a >= b:
+        return a
+    return b
+
+
+def min_val(a, b):
+    if a <= b:
+        return a
+    return b
