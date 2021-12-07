@@ -152,9 +152,11 @@ class ImageProcessing:
         image[image >= self.diff_threshold] = 255
         return image
 
+    # Met l'image en teinte de gris
     def rgb2gray(self, image):
         return np.mean(image, -1)
 
+    # Ajoute l'image à la queue du background
     def add_to_background(self, image):
         if len(self.motion_buffer) == self.motion_buffer_size:
             frame = self.motion_buffer[0]
@@ -169,9 +171,11 @@ class ImageProcessing:
         self.bg_sum = self.bg_sum + frame
         self.bg_buffer.append(frame)
 
+    # Calcule la moyenne des images du background
     def calc_background_average(self):
         return self.bg_sum / len(self.bg_buffer)
 
+    # Calcule la moyenne pondérée des images de mouvements
     def calc_weighted_movement_average(self, movement_shape):
         weighted_sum = np.zeros(movement_shape, dtype="float32")
         i = 0
