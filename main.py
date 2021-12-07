@@ -240,6 +240,7 @@ class Interface(tk.Tk):
         self.count = 0
         self.thread = None
         self.alert_sent = False
+        self.stat_isOpen = False
         self.last_frame_time = time()
         self.vs = FileVideoStream(self.path).start()
         self.options = None
@@ -305,11 +306,47 @@ class Interface(tk.Tk):
         self.label = tk.Label(motion_filter, image=self.image)
         self.label.grid(row=0, columnspan=5, padx=10, pady=10)
 
-    def open_stat(self):
-        stat = tk.Toplevel()
-        stat.geometry("+1000+350")
-        stat.title("Statistiques")
+
+    def add_stat(self):
         list_stat = performance_statistics.stats
+        self.label_stat2.destroy()
+        for i in range(len(list_stat)):
+            self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
+            self.label_stat1.grid(row=i+1, column=0, padx=10, pady=10)
+
+            self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
+            self.label_stat2.grid(row=i+1, column=1, padx=10, pady=10)
+
+            # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
+            # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+    
+    def open_stat(self):
+        self.stat = tk.Toplevel()
+        self.stat.geometry("+1000+350")
+        self.stat.title("Statistiques")
+        self.stat_isOpen = True
+
+        list_stat = performance_statistics.stats
+        self.label_stat1 = tk.Label(self.stat, text="Name")
+        self.label_stat1.grid(row=0, column=0, padx=10, pady=10)
+
+        self.label_stat2 = tk.Label(self.stat, text="Value")
+        self.label_stat2.grid(row=0, column=1, padx=10, pady=10)
+
+        # self.label_stat3 = tk.Label(self.stat, text="Average")
+        # self.label_stat3.grid(row=0, column=2, padx=10, pady=10)
+
+
+        for i in range(len(list_stat)):
+            self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
+            self.label_stat1.grid(row=i+1, column=0, padx=10, pady=10)
+
+            self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
+            self.label_stat2.grid(row=i+1, column=1, padx=10, pady=10)
+
+            # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
+            # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+    
 
 
     def open_options(self):
@@ -322,8 +359,8 @@ class Interface(tk.Tk):
                 while time() <= self.last_frame_time + 1 / self.options.framerate.get():
                     pass
             self.last_frame_time = time()
-            # self.frame = self.vs.read()
-            self.frame = get_image()
+            self.frame = self.vs.read()
+            # self.frame = get_image()
             if self.frame is None:
                 break
             image = Image.fromarray(self.frame)
@@ -350,6 +387,9 @@ class Interface(tk.Tk):
                 ).astype("uint8")
             )
             self.display_image(image)
+
+            if self.stat_isOpen == True:
+                self.add_stat()
 
             if len(boxes) >= 1 and self.alert_sent == False:
                 image.save("images/IPcam.png")
