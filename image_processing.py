@@ -95,7 +95,7 @@ class ImageProcessing:
         b = time()
         performance_statistics.add_stat("motion area detection", b - a)
 
-        return image, movement, self.detection, boxes
+        return image, self.color_movement, self.detection, boxes
 
     # Filtre gaussien
     def custom_gaussian(self, image):

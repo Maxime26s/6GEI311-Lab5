@@ -1,8 +1,10 @@
 stats = []
+
 stats_average = []
 
 # Ajoute une valeur à une statistique
 def add_stat(name, value):
+
     added = False
     valueT = str(value)
     for i in range(len(stats)):
@@ -14,7 +16,7 @@ def add_stat(name, value):
             stats[i][2]  = stats_average[i][0] / stats_average[i][1]
 
             added = True
-    
+
     if added == False:
         stats.append([name, valueT, value])
         stats_average.append([value, 1])

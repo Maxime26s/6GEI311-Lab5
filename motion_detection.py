@@ -1,4 +1,3 @@
-from tkinter.constants import X
 from skimage import measure
 import math
 import numpy as np
@@ -44,10 +43,7 @@ class Motion_Detection:
                         if (
                             box2 != None
                             and box1 != box2
-                            and (
-                                box1.contains(box2.p1.x, box2.p1.y)
-                                or box1.contains(box2.p2.x, box2.p2.y)
-                            )
+                            and (box1.contains(box2.p1) or box1.contains(box2.p2))
                         ):
                             combined = True
                             box1.p1 = Point(
@@ -62,11 +58,13 @@ class Motion_Detection:
         return boxes
 
 
+# Classe représentant un point
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
+    # Repositionne le point selon une nouvelle dimension
     def resize(self, ratio):
         self.x = math.floor(self.x * ratio)
         self.y = math.floor(self.y * ratio)
@@ -76,39 +74,33 @@ class Box:
     def __init__(self, p1, p2=Point(0, 0)):
         self.p1 = p1
         self.p2 = p2
-        self.used = False
 
-    def check_point(self, image, x, y):
-        size = image.shape
-        if x >= 0 and x < size[1] and y >= 0 and y < size[0] and image[y][x] == 127:
-            self.p1.x = min_val(self.p1.x, x)
-            self.p1.y = min_val(self.p1.y, y)
-            self.p2.x = max_val(self.p2.x, x)
-            self.p2.y = max_val(self.p2.y, y)
-            return True
-        return False
-
+    # Retourne l'aire de la boite
     def size(self):
         return (self.p2.x - self.p1.x) * (self.p2.y - self.p1.y)
 
-    def contains(self, x, y):
-        if x >= self.p1.x and x <= self.p2.x:
-            if y >= self.p1.y and y <= self.p2.y:
+    # Vérifie si un point x,y se trouve dans la boite
+    def contains(self, p):
+        if p.x >= self.p1.x and p.x <= self.p2.x:
+            if p.y >= self.p1.y and p.y <= self.p2.y:
                 return True
         return False
 
+    # Redéfinie les coins selon une nouvelle taille
     def resize(self, old, new):
         ratio = new / old
         self.p1.resize(ratio)
         self.p2.resize(ratio)
 
 
+# Retourne la plus grande valeur
 def max_val(a, b):
     if a >= b:
         return a
     return b
 
 
+# Retourne la plus petite valeur
 def min_val(a, b):
     if a <= b:
         return a
