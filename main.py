@@ -178,13 +178,13 @@ class Options(tk.Toplevel):
         # self.combo.set("Pick an algo")
         # self.combo.grid(row=0, column=1, padx=5, pady=5)
         self.l1 = Label(self.t4, text="Motion Buffer size", anchor="w")
-        self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
+        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
         self.ent6 = Entry(
             self.t4, textvariable=self.motion_buffer_size, width=21
         )  # font=(,'Terminal',30))
         self.ent6.place(width=150, height=50)
-        self.ent6.grid(row=1, column=1, pady=5, padx=10)
+        self.ent6.grid(row=0, column=1, pady=5, padx=10)
 
         self.l2 = Label(self.t4, text="Background Buffer size", anchor="w")
         self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
