@@ -233,11 +233,12 @@ class Options(tk.Toplevel):
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
-        self.path = "./camT2.mp4"
+        self.path = "./cam2.mp4"
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
-        self.count = 0
+        self.motion_label = None
+        self.stat = None
         self.thread = None
         self.alert_sent = False
         self.stat_isOpen = False
@@ -245,7 +246,7 @@ class Interface(tk.Tk):
         self.vs = FileVideoStream(self.path).start()
         self.options = None
         # self.vs = VideoStream(src=0).start()
-        self.start_thread()
+        # self.start_thread()
 
     # Création de boutons
     def create_main(self):
@@ -291,7 +292,8 @@ class Interface(tk.Tk):
 
     # Fonction de sélection de fichier
     def select_file(self):
-        self.stop_thread()
+        if self.thread != None:
+            self.stop_thread()
         Tk().withdraw()
         fileName = askopenfilename()
         self.path = fileName
@@ -303,23 +305,22 @@ class Interface(tk.Tk):
         motion_filter.geometry("+1000+100")
         motion_filter.title("Motion Filter")
 
-        self.label = tk.Label(motion_filter, image=self.image)
-        self.label.grid(row=0, columnspan=5, padx=10, pady=10)
-
+        self.motion_label = tk.Label(motion_filter)
+        self.motion_label.grid(row=0, columnspan=5, padx=10, pady=10)
 
     def add_stat(self):
         list_stat = performance_statistics.stats
         self.label_stat2.destroy()
         for i in range(len(list_stat)):
             self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
-            self.label_stat1.grid(row=i+1, column=0, padx=10, pady=10)
+            self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
 
             self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
-            self.label_stat2.grid(row=i+1, column=1, padx=10, pady=10)
+            self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
             # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
             # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
-    
+
     def open_stat(self):
         self.stat = tk.Toplevel()
         self.stat.geometry("+1000+350")
@@ -336,24 +337,21 @@ class Interface(tk.Tk):
         # self.label_stat3 = tk.Label(self.stat, text="Average")
         # self.label_stat3.grid(row=0, column=2, padx=10, pady=10)
 
-
         for i in range(len(list_stat)):
             self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
-            self.label_stat1.grid(row=i+1, column=0, padx=10, pady=10)
+            self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
 
             self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
-            self.label_stat2.grid(row=i+1, column=1, padx=10, pady=10)
+            self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
             # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
             # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
-    
-
 
     def open_options(self):
         self.options = Options(self, self.options, self.restart_thread)
-        self.options.grab_set()
 
     def video_loop(self):
+        last_stat_update = 0
         while not self.thread.stopped():
             if self.options != None and self.options.framerate.get() > 0:
                 while time() <= self.last_frame_time + 1 / self.options.framerate.get():
@@ -363,33 +361,44 @@ class Interface(tk.Tk):
             # self.frame = get_image()
             if self.frame is None:
                 break
+
             image = Image.fromarray(self.frame)
-            # image.save("images/IPcam.png")
             image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
             image, motion, detection, boxes = self.image_processing.process_image(image)
             image = Image.fromarray(image.astype("uint8"))
             motion = Image.fromarray(motion.astype("uint8"))
             detection = Image.fromarray(detection.astype("uint8"))
-            # image = self.image_processing.resize_cv(image, 1920 / image.shape[1])
-            # image = Image.fromarray(self.image_processing.detection.astype("uint8"))
-            # image = image.resize(
-            #    (960, int(float(image.size[1]) * float(960 / float(image.size[0]))))
-            # )
+
             for box in boxes:
-                detection = self.draw_rectangle(detection, box)
                 box.resize(detection.size[0], image.size[0])
                 image = self.draw_rectangle(image, box)
-            detection = Image.fromarray(
+
+            proportion = 1
+            if image.size[0] > image.size[1]:
+                proportion = 1280 / image.size[0]
+            else:
+                proportion = 720 / image.size[1]
+            newSize = (int(image.size[0] * proportion), int(image.size[1] * proportion))
+            image = Image.fromarray(
                 cv2.resize(
-                    np.asarray(detection),
-                    image.size,
+                    np.asarray(image),
+                    newSize,
                     cv2.INTER_CUBIC,
                 ).astype("uint8")
             )
-            self.display_image(image)
+            self.display_image(image, self.label)
+            if self.motion_label != None:
+                try:
+                    self.display_image(motion, self.motion_label)
+                except:
+                    self.motion_label = None
 
-            if self.stat_isOpen == True:
-                self.add_stat()
+            if self.stat != None and time() - last_stat_update > 1:
+                try:
+                    self.add_stat()
+                except:
+                    self.stat = None
+                last_stat_update = time()
 
             if len(boxes) >= 1 and self.alert_sent == False:
                 image.save("images/IPcam.png")
@@ -399,17 +408,15 @@ class Interface(tk.Tk):
                 # thread_send_sms.start()
                 self.alert_sent = True
 
-    def display_image(self, image1):
-        self.image = ImageTk.PhotoImage(image1)
+    def display_image(self, image, label):
+        self.image = ImageTk.PhotoImage(image)
 
-        if self.label is None:
-            self.label = tk.Label(image=self.image)
-            self.label.grid(row=0, columnspan=5, padx=10, pady=10)
+        if label is None:
+            label = tk.Label(image=self.image)
+            label.grid(row=0, columnspan=5, padx=10, pady=10)
         else:
-            self.label.configure(image=self.image)
-        self.label.image = self.image
-
-        self.count += 1
+            label.configure(image=self.image)
+        label.image = self.image
 
     def draw_rectangle(self, image, box):
         draw = ImageDraw.Draw(image)
@@ -419,7 +426,8 @@ class Interface(tk.Tk):
         return image
 
     def restart_thread(self):
-        self.stop_thread()
+        if self.thread != None:
+            self.stop_thread()
         self.start_thread()
 
     def stop_thread(self):
@@ -450,6 +458,7 @@ class Interface(tk.Tk):
         self.master.destroy()
 
 
+# Init l'application
 if __name__ == "__main__":
     root = Interface()
     root.title("Motion detection")
