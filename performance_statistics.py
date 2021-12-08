@@ -9,6 +9,7 @@ class Stat:
         self.value = 0
         self.average = 0
 
+    # Ajoute/Update une donnée
     def add_data(self, value):
         self.data.append(value)
         self.value += value

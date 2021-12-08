@@ -88,62 +88,49 @@ class Options(tk.Toplevel):
         self.add_tab4()
         self.add_tab5()
 
+    # Recharge le module de traitement d'image avec les options
     def confirm_options(self):
         self.confirm()
 
+    # Ajoute l'onglet d'option général
     def add_tab1(self):
         self.l0 = Label(self.t1, text="Threshold", anchor="w")
         self.l0.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.ent0 = Entry(
-            self.t1, textvariable=self.threshold, width=21
-        )  # font=(,'Terminal',30))
+        self.ent0 = Entry(self.t1, textvariable=self.threshold, width=21)
         self.ent0.place(width=150, height=50)
         self.ent0.grid(row=0, column=1, pady=5, padx=10)
 
         self.l1 = Label(self.t1, text="Framerate", anchor="w")
         self.l1.grid(row=1, column=0, padx=10, pady=10)
 
-        self.ent1 = Entry(
-            self.t1, textvariable=self.framerate, width=21
-        )  # font=(,'Terminal',30))
+        self.ent1 = Entry(self.t1, textvariable=self.framerate, width=21)
         self.ent1.place(width=150, height=50)
         self.ent1.grid(row=1, column=1, pady=5, padx=10)
 
         button = Button(self.t1, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=2, columnspan=2, padx=5, pady=5)
 
+    # Ajoute l'onglet d'option de compression d'image
     def add_tab2(self):
-        # vlist = ["CV2"]
-
-        # self.l1 = Label(self.t2, text="Algorithme", anchor="w")
-        # self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
-
-        # self.combo = ttk.Combobox(self.t2, values=vlist)
-        # self.combo.set("Pick an algo")
-        # self.combo.grid(row=0, column=1, padx=5, pady=5)
-
         self.l1 = Label(self.t2, text="Scale ratio", anchor="w")
         self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent2 = Entry(
-            self.t2, textvariable=self.scale_ratio, width=21
-        )  # font=(,'Terminal',30))
+        self.ent2 = Entry(self.t2, textvariable=self.scale_ratio, width=21)
         self.ent2.place(width=150, height=50)
         self.ent2.grid(row=1, column=1, pady=5, padx=10)
 
         self.l2 = Label(self.t2, text="Compression", anchor="w")
         self.l2.grid(row=2, column=0, padx=10, pady=10)
 
-        self.ent3 = Entry(
-            self.t2, textvariable=self.compression_ratio, width=21
-        )  # font=(,'Terminal',30))
+        self.ent3 = Entry(self.t2, textvariable=self.compression_ratio, width=21)
         self.ent3.place(width=150, height=50)
         self.ent3.grid(row=2, column=1, pady=5, padx=10)
 
         button = Button(self.t2, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=3, columnspan=2, padx=5, pady=5)
 
+    # Ajoute l'onglet d'option du flou gaussien
     def add_tab3(self):
         vlist = ["CV2", "Custom"]
 
@@ -159,61 +146,38 @@ class Options(tk.Toplevel):
         self.l2 = Label(self.t3, text="Kernel size", anchor="w")
         self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent4 = Entry(
-            self.t3, textvariable=self.kernel_size, width=21
-        )  # font=(,'Terminal',30))
+        self.ent4 = Entry(self.t3, textvariable=self.kernel_size, width=21)
         self.ent4.place(width=150, height=50)
         self.ent4.grid(row=1, column=1, pady=5, padx=10)
 
         button = Button(self.t3, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=2, columnspan=2, padx=5, pady=5)
 
+    # Ajoute l'onglet d'option des buffers
     def add_tab4(self):
-        # vlist = ["CV2"]
-
-        # self.l1 = Label(self.t4, text="Algorithme", anchor="w")
-        # self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
-
-        # self.combo = ttk.Combobox(self.t4, values=vlist)
-        # self.combo.set("Pick an algo")
-        # self.combo.grid(row=0, column=1, padx=5, pady=5)
         self.l1 = Label(self.t4, text="Motion Buffer size", anchor="w")
         self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent6 = Entry(
-            self.t4, textvariable=self.motion_buffer_size, width=21
-        )  # font=(,'Terminal',30))
+        self.ent6 = Entry(self.t4, textvariable=self.motion_buffer_size, width=21)
         self.ent6.place(width=150, height=50)
         self.ent6.grid(row=1, column=1, pady=5, padx=10)
 
         self.l2 = Label(self.t4, text="Background Buffer size", anchor="w")
         self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent5 = Entry(
-            self.t4, textvariable=self.bg_buffer_size, width=21
-        )  # font=(,'Terminal',30))
+        self.ent5 = Entry(self.t4, textvariable=self.bg_buffer_size, width=21)
         self.ent5.place(width=150, height=50)
         self.ent5.grid(row=1, column=1, pady=5, padx=10)
 
         button = Button(self.t4, text="Confirm", padx=24, command=self.confirm_options)
         button.grid(row=2, columnspan=2, padx=5, pady=5)
 
+    # Ajoute l'onglet d'option de la détection de mouvement
     def add_tab5(self):
-        # vlist = ["CV2"]
-
-        # self.l1 = Label(self.t5, text="Algorithme", anchor="w")
-        # self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
-
-        # self.combo = ttk.Combobox(self.t5, values=vlist)
-        # self.combo.set("Pick an algo")
-        # self.combo.grid(row=0, column=1, padx=5, pady=5)
-
         self.l1 = Label(self.t5, text="Min size ratio", anchor="w")
         self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent7 = Entry(
-            self.t5, textvariable=self.min_size_ratio, width=21
-        )  # font=(,'Terminal',30))
+        self.ent7 = Entry(self.t5, textvariable=self.min_size_ratio, width=21)
         self.ent7.place(width=150, height=50)
         self.ent7.grid(row=1, column=1, pady=5, padx=10)
 
@@ -222,7 +186,7 @@ class Options(tk.Toplevel):
 
         self.ent8 = Checkbutton(
             self.t5, variable=self.shouldCombine, onvalue=True, offvalue=False, width=21
-        )  # font=(,'Terminal',30))
+        )
         self.ent8.place(width=150, height=50)
         self.ent8.grid(row=2, column=1, pady=5, padx=10)
 
@@ -230,6 +194,7 @@ class Options(tk.Toplevel):
         button.grid(row=3, columnspan=2, padx=5, pady=5)
 
 
+# Interface principale
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
@@ -300,6 +265,7 @@ class Interface(tk.Tk):
         self.vs = FileVideoStream(self.path).start()
         self.start_thread()
 
+    # Ouvre la vue du filtre d'image
     def open_motiom_filter(self):
         motion_filter = tk.Toplevel()
         motion_filter.geometry("+1000+100")
@@ -308,6 +274,7 @@ class Interface(tk.Tk):
         self.motion_label = tk.Label(motion_filter)
         self.motion_label.grid(row=0, columnspan=5, padx=10, pady=10)
 
+    # Actualise les statistiques
     def add_stat(self):
         list_stat = performance_statistics.stats
         self.label_stat2.destroy()
@@ -322,6 +289,7 @@ class Interface(tk.Tk):
             self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
             self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
 
+    # Ouvre la fenêtre de statistiques
     def open_stat(self):
         self.stat = tk.Toplevel()
         self.stat.geometry("+1000+350")
@@ -348,9 +316,11 @@ class Interface(tk.Tk):
             self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
             self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
 
+    # Ouvre le menu d'options
     def open_options(self):
         self.options = Options(self, self.options, self.restart_thread)
 
+    # Logique de traitement d'image et d'affichage pour chaque frame
     def video_loop(self):
         last_stat_update = 0
         while not self.thread.stopped():
@@ -409,6 +379,7 @@ class Interface(tk.Tk):
                 # thread_send_sms.start()
                 self.alert_sent = True
 
+    # Affiche l'image dans un label
     def display_image(self, image, label):
         self.image = ImageTk.PhotoImage(image)
 
@@ -419,6 +390,7 @@ class Interface(tk.Tk):
             label.configure(image=self.image)
         label.image = self.image
 
+    # Dessine un rectangle à une position donnée
     def draw_rectangle(self, image, box):
         draw = ImageDraw.Draw(image)
         draw.rectangle(
@@ -426,15 +398,18 @@ class Interface(tk.Tk):
         )
         return image
 
+    # Restart le thread de filtrage/détection de mouvement
     def restart_thread(self):
         if self.thread != None:
             self.stop_thread()
         self.start_thread()
 
+    # Tue le thread
     def stop_thread(self):
         self.thread.stop()
         self.thread.join(timeout=0.05)
 
+    # Commence le thread avec les settings appropriés pour le traitement d'image
     def start_thread(self):
         if self.options != None:
             self.image_processing = ImageProcessing(
