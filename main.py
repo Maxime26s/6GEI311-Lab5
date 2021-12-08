@@ -233,7 +233,7 @@ class Options(tk.Toplevel):
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
-        self.path = "./cam2.mp4"
+        # self.path = None
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
@@ -243,13 +243,14 @@ class Interface(tk.Tk):
         self.alert_sent = False
         self.stat_isOpen = False
         self.last_frame_time = time()
-        self.vs = FileVideoStream(self.path).start()
         self.options = None
         self.label_all_stat1 = []
         self.label_all_stat2 = []
         self.label_all_stat3 = []
         # self.vs = VideoStream(src=0).start()
         # self.start_thread()
+
+        # self.path = tk.StringVar(value=None)
 
     # Création de boutons
     def create_main(self):
@@ -295,13 +296,47 @@ class Interface(tk.Tk):
 
     # Fonction de sélection de fichier
     def select_file(self):
+        self.select_file_win = tk.Toplevel()
+        self.select_file_win.title("Select File")
+
+        self.path = tk.StringVar()
+
+        self.label_select_file = tk.Label(self.select_file_win, text="Select a file or put a link")
+        self.label_select_file.grid(row=0, columnspan=2, padx=10, pady=10)
+        
+        self.ent_select_file = Entry(
+            self.select_file_win, textvariable=self.path, width=21
+        )
+        self.ent_select_file.place(width=150, height=50)
+        self.ent_select_file.grid(row=1, column=0, pady=5, padx=10)
+
+        button_browse = Button(
+            self.select_file_win,
+            text="Browse",
+            width=10,
+            command=partial(self.select_localfile),
+        )
+        button_browse.grid(row=1, column=1, padx=5, pady=5)
+
+        button_confirm_file = Button(
+            self.select_file_win,
+            text="Confirm",
+            width=10,
+            command=partial(self.confirm_select_file),
+        )
+        button_confirm_file.grid(row=2, columnspan=2, padx=5, pady=5)
+
+    def select_localfile(self):
         if self.thread != None:
             self.stop_thread()
         Tk().withdraw()
         fileName = askopenfilename()
-        self.path = fileName
-        self.vs = FileVideoStream(self.path).start()
+        self.path.set(fileName)
+
+    def confirm_select_file(self):
+        self.vs = FileVideoStream(self.path.get()).start()
         self.start_thread()
+        self.select_file_win.destroy()
 
     def open_motiom_filter(self):
         motion_filter = tk.Toplevel()
@@ -317,7 +352,6 @@ class Interface(tk.Tk):
         for i in range(len(self.list_stat)):
             self.label_all_stat1[i]["text"] = self.list_stat[i][0]
             self.label_all_stat2[i]["text"] = self.list_stat[i][1]
-            self.label_all_stat3[i]["text"] = self.list_stat[i][2]
 
     def open_stat(self):
         self.stat = tk.Toplevel()
@@ -329,15 +363,11 @@ class Interface(tk.Tk):
         self.label_stat_name = tk.Label(self.stat, text="Name")
         self.label_stat_name.grid(row=0, column=0, padx=10, pady=10)
 
-        self.label_stat_value = tk.Label(self.stat, text="Value")
-        self.label_stat_value.grid(row=0, column=1, padx=10, pady=10)
-
         self.label_stat_average = tk.Label(self.stat, text="Average Time")
-        self.label_stat_average.grid(row=0, column=2, padx=10, pady=10)
+        self.label_stat_average.grid(row=0, column=1, padx=10, pady=10)
 
         self.label_all_stat1.clear()
         self.label_all_stat2.clear()
-        self.label_all_stat3.clear()
 
         for i in range(len(self.list_stat)):
             self.label_stat1 = tk.Label(self.stat, text=self.list_stat[i][0])
@@ -346,12 +376,8 @@ class Interface(tk.Tk):
             self.label_stat2 = tk.Label(self.stat, text=self.list_stat[i][1])
             self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
-            self.label_stat3 = tk.Label(self.stat, text=self.list_stat[i][2])
-            self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
-
             self.label_all_stat1.append(self.label_stat1)
             self.label_all_stat2.append(self.label_stat2)
-            self.label_all_stat3.append(self.label_stat3)
 
     def open_options(self):
         self.options = Options(self, self.options, self.restart_thread)
@@ -367,8 +393,11 @@ class Interface(tk.Tk):
                     ):
                         pass
                 self.last_frame_time = time()
-                self.frame = self.vs.read()
-                # self.frame = get_image()
+                path = self.path.get()
+                if path[0:4] == "http":
+                    self.frame = get_image(self.path.get()) 
+                else : self.frame = self.vs.read()
+                
                 if self.frame is None:
                     break
 

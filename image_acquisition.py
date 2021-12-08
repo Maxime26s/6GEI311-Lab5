@@ -6,8 +6,8 @@
 
 import cv2
 
-def get_image():
-        cap = cv2.VideoCapture('http://68.54.117.52:90/jpgmulreq/1/image.jpg?key=1516975535684&l')
+def get_image(path):
+        cap = cv2.VideoCapture(path)
 
         while (True):
             ret, frame = cap.read()
