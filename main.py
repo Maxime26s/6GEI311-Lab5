@@ -311,6 +311,7 @@ class Interface(tk.Tk):
     def add_stat(self):
         list_stat = performance_statistics.stats
         self.label_stat2.destroy()
+        self.label_stat3.destroy()
         for i in range(len(list_stat)):
             self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
             self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
@@ -318,8 +319,8 @@ class Interface(tk.Tk):
             self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
             self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
-            # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
-            # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+            self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
+            self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
 
     def open_stat(self):
         self.stat = tk.Toplevel()
@@ -334,8 +335,8 @@ class Interface(tk.Tk):
         self.label_stat2 = tk.Label(self.stat, text="Value")
         self.label_stat2.grid(row=0, column=1, padx=10, pady=10)
 
-        # self.label_stat3 = tk.Label(self.stat, text="Average")
-        # self.label_stat3.grid(row=0, column=2, padx=10, pady=10)
+        self.label_stat3 = tk.Label(self.stat, text="Average")
+        self.label_stat3.grid(row=0, column=2, padx=10, pady=10)
 
         for i in range(len(list_stat)):
             self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
@@ -344,8 +345,8 @@ class Interface(tk.Tk):
             self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
             self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
-            # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
-            # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+            self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
+            self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
 
     def open_options(self):
         self.options = Options(self, self.options, self.restart_thread)
