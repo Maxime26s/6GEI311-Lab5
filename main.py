@@ -245,6 +245,9 @@ class Interface(tk.Tk):
         self.last_frame_time = time()
         self.vs = FileVideoStream(self.path).start()
         self.options = None
+        self.label_all_stat1 = []
+        self.label_all_stat2 = []
+        self.label_all_stat3 = []
         # self.vs = VideoStream(src=0).start()
         # self.start_thread()
 
@@ -309,17 +312,42 @@ class Interface(tk.Tk):
         self.motion_label.grid(row=0, columnspan=5, padx=10, pady=10)
 
     def add_stat(self):
-        list_stat = performance_statistics.stats
-        self.label_stat2.destroy()
-        for i in range(len(list_stat)):
-            self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
+        
+        
+        # # for self.list_stat in self.label_all_stat1:
+        # #     self.list_stat = []
+
+        # self.label_all_stat1.clear()
+        # self.label_all_stat2.clear()
+        # self.label_all_stat3.clear()
+
+        self.list_stat = performance_statistics.stats
+        print(self.list_stat)
+        for label in self.label_all_stat2:
+            label.destroy()
+
+
+        for i in range(len(self.list_stat)):
+            
+            self.label_stat1 = tk.Label(self.stat, text=self.list_stat[i][0])
             self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
 
-            self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
+            self.label_stat2 = tk.Label(self.stat, text=self.list_stat[i][1])
             self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
-            # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
-            # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+            self.label_stat3 = tk.Label(self.stat, text=self.list_stat[i][2])
+            self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+
+            # self.label_stat1.config(text=self.list_stat[i][0])
+            # self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
+            # self.label_stat2.config(text=self.list_stat[i][1])
+            # self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
+            # self.label_stat3.config(text=self.list_stat[i][2])
+            # self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
+
+            self.label_all_stat1.append(self.label_stat1)
+            self.label_all_stat2.append(self.label_stat2)
+            self.label_all_stat3.append(self.label_stat3)
 
     def open_stat(self):
         self.stat = tk.Toplevel()
@@ -327,25 +355,32 @@ class Interface(tk.Tk):
         self.stat.title("Statistiques")
         self.stat_isOpen = True
 
-        list_stat = performance_statistics.stats
-        self.label_stat1 = tk.Label(self.stat, text="Name")
-        self.label_stat1.grid(row=0, column=0, padx=10, pady=10)
+        self.list_stat = performance_statistics.stats
+        self.label_stat_name = tk.Label(self.stat, text="Name")
+        self.label_stat_name.grid(row=0, column=0, padx=10, pady=10)
 
-        self.label_stat2 = tk.Label(self.stat, text="Value")
-        self.label_stat2.grid(row=0, column=1, padx=10, pady=10)
+        self.label_stat_value = tk.Label(self.stat, text="Value")
+        self.label_stat_value.grid(row=0, column=1, padx=10, pady=10)
 
-        # self.label_stat3 = tk.Label(self.stat, text="Average")
-        # self.label_stat3.grid(row=0, column=2, padx=10, pady=10)
+        self.label_stat_average = tk.Label(self.stat, text="Average Time")
+        self.label_stat_average.grid(row=0, column=2, padx=10, pady=10)
 
-        for i in range(len(list_stat)):
-            self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
+        print(self.list_stat)
+
+
+        for i in range(len(self.list_stat)):
+            self.label_stat1 = tk.Label(self.stat, text=self.list_stat[i][0])
             self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
 
-            self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
+            self.label_stat2 = tk.Label(self.stat, text=self.list_stat[i][1])
             self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
-            # self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
-            # self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+            self.label_stat3 = tk.Label(self.stat, text=self.list_stat[i][2])
+            self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+
+            self.label_all_stat1.append(self.label_stat1)
+            self.label_all_stat2.append(self.label_stat2)
+            self.label_all_stat3.append(self.label_stat3)
 
     def open_options(self):
         self.options = Options(self, self.options, self.restart_thread)
