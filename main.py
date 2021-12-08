@@ -312,42 +312,12 @@ class Interface(tk.Tk):
         self.motion_label.grid(row=0, columnspan=5, padx=10, pady=10)
 
     def add_stat(self):
-        
-        
-        # # for self.list_stat in self.label_all_stat1:
-        # #     self.list_stat = []
-
-        # self.label_all_stat1.clear()
-        # self.label_all_stat2.clear()
-        # self.label_all_stat3.clear()
-
         self.list_stat = performance_statistics.stats
-        print(self.list_stat)
-        for label in self.label_all_stat2:
-            label.destroy()
-
 
         for i in range(len(self.list_stat)):
-            
-            self.label_stat1 = tk.Label(self.stat, text=self.list_stat[i][0])
-            self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
-
-            self.label_stat2 = tk.Label(self.stat, text=self.list_stat[i][1])
-            self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
-
-            self.label_stat3 = tk.Label(self.stat, text=self.list_stat[i][2])
-            self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
-
-            # self.label_stat1.config(text=self.list_stat[i][0])
-            # self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
-            # self.label_stat2.config(text=self.list_stat[i][1])
-            # self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
-            # self.label_stat3.config(text=self.list_stat[i][2])
-            # self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
-
-            self.label_all_stat1.append(self.label_stat1)
-            self.label_all_stat2.append(self.label_stat2)
-            self.label_all_stat3.append(self.label_stat3)
+            self.label_all_stat1[i]["text"] = self.list_stat[i][0]
+            self.label_all_stat2[i]["text"] = self.list_stat[i][1]
+            self.label_all_stat3[i]["text"] = self.list_stat[i][2]
 
     def open_stat(self):
         self.stat = tk.Toplevel()
@@ -365,8 +335,9 @@ class Interface(tk.Tk):
         self.label_stat_average = tk.Label(self.stat, text="Average Time")
         self.label_stat_average.grid(row=0, column=2, padx=10, pady=10)
 
-        print(self.list_stat)
-
+        self.label_all_stat1.clear()
+        self.label_all_stat2.clear()
+        self.label_all_stat3.clear()
 
         for i in range(len(self.list_stat)):
             self.label_stat1 = tk.Label(self.stat, text=self.list_stat[i][0])
@@ -376,7 +347,7 @@ class Interface(tk.Tk):
             self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
             self.label_stat3 = tk.Label(self.stat, text=self.list_stat[i][2])
-            self.label_stat3.grid(row=i+1, column=2, padx=10, pady=10)
+            self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
 
             self.label_all_stat1.append(self.label_stat1)
             self.label_all_stat2.append(self.label_stat2)
@@ -386,62 +357,73 @@ class Interface(tk.Tk):
         self.options = Options(self, self.options, self.restart_thread)
 
     def video_loop(self):
-        last_stat_update = 0
-        while not self.thread.stopped():
-            if self.options != None and self.options.framerate.get() > 0:
-                while time() <= self.last_frame_time + 1 / self.options.framerate.get():
-                    pass
-            self.last_frame_time = time()
-            self.frame = self.vs.read()
-            # self.frame = get_image()
-            if self.frame is None:
-                break
+        try:
+            last_stat_update = 0
+            while not self.thread.stopped():
+                if self.options != None and self.options.framerate.get() > 0:
+                    while (
+                        time()
+                        <= self.last_frame_time + 1 / self.options.framerate.get()
+                    ):
+                        pass
+                self.last_frame_time = time()
+                self.frame = self.vs.read()
+                # self.frame = get_image()
+                if self.frame is None:
+                    break
 
-            image = Image.fromarray(self.frame)
-            image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image, motion, detection, boxes = self.image_processing.process_image(image)
-            image = Image.fromarray(image.astype("uint8"))
-            motion = Image.fromarray(motion.astype("uint8"))
-            detection = Image.fromarray(detection.astype("uint8"))
+                image = Image.fromarray(self.frame)
+                image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+                image, motion, detection, boxes = self.image_processing.process_image(
+                    image
+                )
+                image = Image.fromarray(image.astype("uint8"))
+                motion = Image.fromarray(motion.astype("uint8"))
+                detection = Image.fromarray(detection.astype("uint8"))
 
-            for box in boxes:
-                box.resize(detection.size[0], image.size[0])
-                image = self.draw_rectangle(image, box)
+                for box in boxes:
+                    box.resize(detection.size[0], image.size[0])
+                    image = self.draw_rectangle(image, box)
 
-            proportion = 1
-            if image.size[0] > image.size[1]:
-                proportion = 1280 / image.size[0]
-            else:
-                proportion = 720 / image.size[1]
-            newSize = (int(image.size[0] * proportion), int(image.size[1] * proportion))
-            image = Image.fromarray(
-                cv2.resize(
-                    np.asarray(image),
-                    newSize,
-                    cv2.INTER_CUBIC,
-                ).astype("uint8")
-            )
-            self.display_image(image, self.label)
-            if self.motion_label != None:
-                try:
-                    self.display_image(motion, self.motion_label)
-                except:
-                    self.motion_label = None
+                proportion = 1
+                if image.size[0] > image.size[1]:
+                    proportion = 1280 / image.size[0]
+                else:
+                    proportion = 720 / image.size[1]
+                newSize = (
+                    int(image.size[0] * proportion),
+                    int(image.size[1] * proportion),
+                )
+                image = Image.fromarray(
+                    cv2.resize(
+                        np.asarray(image),
+                        newSize,
+                        cv2.INTER_CUBIC,
+                    ).astype("uint8")
+                )
+                self.display_image(image, self.label)
+                if self.motion_label != None:
+                    try:
+                        self.display_image(motion, self.motion_label)
+                    except:
+                        self.motion_label = None
 
-            if self.stat != None and time() - last_stat_update > 1:
-                try:
-                    self.add_stat()
-                except:
-                    self.stat = None
-                last_stat_update = time()
+                if self.stat != None and time() - last_stat_update > 1:
+                    try:
+                        self.add_stat()
+                    except:
+                        self.stat = None
+                    last_stat_update = time()
 
-            if len(boxes) >= 1 and self.alert_sent == False:
-                image.save("images/IPcam.png")
-                # thread_send_email = threading.Thread(target=lambda: send_alert.send_email())
-                # thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms())
-                # thread_send_email.start()
-                # thread_send_sms.start()
-                self.alert_sent = True
+                if len(boxes) >= 1 and self.alert_sent == False:
+                    image.save("images/IPcam.png")
+                    # thread_send_email = threading.Thread(target=lambda: send_alert.send_email())
+                    # thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms())
+                    # thread_send_email.start()
+                    # thread_send_sms.start()
+                    self.alert_sent = True
+        except:
+            return
 
     def display_image(self, image, label):
         self.image = ImageTk.PhotoImage(image)
