@@ -1,4 +1,3 @@
-from tkinter.constants import X
 from skimage import measure
 import math
 import numpy as np
