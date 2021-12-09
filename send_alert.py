@@ -8,7 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
 
-def send_email():
+def send_email(destination):
 
     mail = EmailMessage()
 
@@ -23,7 +23,7 @@ def send_email():
 
     mail['From'] = '6gei311@gmail.com'
     mail['Pass'] = 'M9hA7C6RN8nr'
-    mail['To'] = mail['From']
+    mail['To'] = destination
     mail['Subject'] = "Alert - Mouvement detected"
     
     ImgFileName = "images/IPcam.png"
@@ -51,7 +51,7 @@ def send_email():
     server.quit()
     return
 
-def send_sms():
+def send_sms(destination):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
@@ -65,7 +65,7 @@ def send_sms():
                              "Check your mail. \n\n" \
                              + dt_string,
                         from_='+15812055890',
-                        to='+15815609495'
+                        to=destination
                  )
     print(message.sid)
 if __name__ == "__main__":

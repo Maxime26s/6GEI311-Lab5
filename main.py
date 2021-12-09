@@ -75,6 +75,7 @@ class Options(tk.Toplevel):
         self.t3 = ttk.Frame(self.tab)
         self.t4 = ttk.Frame(self.tab)
         self.t5 = ttk.Frame(self.tab)
+        self.t6 = ttk.Frame(self.tab)
         self.tab.add(self.t1, text="General")
         self.tab.add(self.t2, text="Resize")
         self.tab.add(self.t3, text="Gaussian blur")
@@ -212,6 +213,8 @@ class Interface(tk.Tk):
         self.label_all_stat1 = []
         self.label_all_stat2 = []
         self.label_all_stat3 = []
+        self.mail = ''
+        self.sms = ''
         # self.vs = VideoStream(src=0).start()
         # self.start_thread()
 
@@ -253,11 +256,46 @@ class Interface(tk.Tk):
 
         button5 = Button(
             self,
-            text="Help",
+            text="Set Alert",
             width=10,
-            # command=partial(self.open_help),
+            command=partial(self.select_alert),
         )
         button5.grid(row=1, column=4, padx=5, pady=5)
+        
+
+    def select_alert(self):
+        self.select_alert_win = tk.Toplevel()
+        self.select_alert_win.title("Select File")
+
+        mail = tk.StringVar()
+        sms = tk.StringVar()
+
+        self.label_select_alert1 = Label(self.select_alert_win, text="Mail", anchor="w")
+        self.label_select_alert1.grid(row=0, column=0, padx=10, pady=(15, 10))
+
+        self.ent_select_alert1 = Entry(self.select_alert_win, textvariable=mail, width=21)
+        self.ent_select_alert1.grid(row=0, column=1, pady=5, padx=10)
+
+        self.label_select_alert2 = Label(self.select_alert_win, text="SMS", anchor="w")
+        self.label_select_alert2.grid(row=1, column=0, padx=10, pady=(15, 10))
+
+        self.ent_select_alert2 = Entry(self.select_alert_win, textvariable=sms, width=21)
+        self.ent_select_alert2.grid(row=1, column=1, pady=5, padx=10)
+
+        def confirm_select_alert():
+            self.mail = mail.get()
+            self.sms = sms.get()
+            self.alert_sent = False
+            self.select_alert_win.destroy()
+
+        btn_confirm = Button(
+            self.select_alert_win,
+            text="Confirm",
+            padx=24,
+            command=confirm_select_alert,
+        )
+        btn_confirm.grid(row=2, columnspan=2, padx=5, pady=5)
+
 
     # Fonction de sélection de fichier
     def select_file(self):
@@ -416,12 +454,16 @@ class Interface(tk.Tk):
                     last_stat_update = time()
 
                 if len(boxes) >= 1 and self.alert_sent == False:
-                    image.save("images/IPcam.png")
-                    # thread_send_email = threading.Thread(target=lambda: send_alert.send_email())
-                    # thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms())
-                    # thread_send_email.start()
-                    # thread_send_sms.start()
-                    self.alert_sent = True
+                    if self.mail != '':
+                        image.save("images/IPcam.png")
+                        thread_send_email = threading.Thread(target=lambda: send_alert.send_email(str(self.mail)))
+                        thread_send_email.start()
+                        self.alert_sent = True
+
+                    if self.sms != '':
+                        thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms(str(self.sms)))
+                        thread_send_sms.start()
+                        self.alert_sent = True
         except:
             return
 
