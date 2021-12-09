@@ -65,7 +65,6 @@ class Options(tk.Toplevel):
             self.min_size_ratio.set(oldOptions.min_size_ratio.get())
             self.shouldCombine.set(oldOptions.shouldCombine.get())
             self.gaussian_algo.set(oldOptions.gaussian_algo.get())
-
         self.option = tkinter.Toplevel()
         self.option.geometry("+1000+600")
         self.option.title("Options")
@@ -213,8 +212,8 @@ class Interface(tk.Tk):
         self.label_all_stat1 = []
         self.label_all_stat2 = []
         self.label_all_stat3 = []
-        self.mail = ''
-        self.sms = ''
+        self.mail = ""
+        self.sms = ""
         # self.vs = VideoStream(src=0).start()
         # self.start_thread()
 
@@ -261,7 +260,6 @@ class Interface(tk.Tk):
             command=partial(self.select_alert),
         )
         button5.grid(row=1, column=4, padx=5, pady=5)
-        
 
     def select_alert(self):
         self.select_alert_win = tk.Toplevel()
@@ -273,13 +271,17 @@ class Interface(tk.Tk):
         self.label_select_alert1 = Label(self.select_alert_win, text="Mail", anchor="w")
         self.label_select_alert1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
-        self.ent_select_alert1 = Entry(self.select_alert_win, textvariable=mail, width=21)
+        self.ent_select_alert1 = Entry(
+            self.select_alert_win, textvariable=mail, width=21
+        )
         self.ent_select_alert1.grid(row=0, column=1, pady=5, padx=10)
 
         self.label_select_alert2 = Label(self.select_alert_win, text="SMS", anchor="w")
         self.label_select_alert2.grid(row=1, column=0, padx=10, pady=(15, 10))
 
-        self.ent_select_alert2 = Entry(self.select_alert_win, textvariable=sms, width=21)
+        self.ent_select_alert2 = Entry(
+            self.select_alert_win, textvariable=sms, width=21
+        )
         self.ent_select_alert2.grid(row=1, column=1, pady=5, padx=10)
 
         def confirm_select_alert():
@@ -296,7 +298,6 @@ class Interface(tk.Tk):
         )
         btn_confirm.grid(row=2, columnspan=2, padx=5, pady=5)
 
-
     # Fonction de sélection de fichier
     def select_file(self):
         self.select_file_win = tk.Toplevel()
@@ -304,9 +305,11 @@ class Interface(tk.Tk):
 
         self.path = tk.StringVar()
 
-        self.label_select_file = tk.Label(self.select_file_win, text="Select a file or put a link")
+        self.label_select_file = tk.Label(
+            self.select_file_win, text="Select a file or put a link"
+        )
         self.label_select_file.grid(row=0, columnspan=2, padx=10, pady=10)
-        
+
         self.ent_select_file = Entry(
             self.select_file_win, textvariable=self.path, width=21
         )
@@ -404,12 +407,12 @@ class Interface(tk.Tk):
                 self.last_frame_time = time()
                 path = self.path.get()
                 if path[0:4] == "http":
-                    self.frame = get_image(self.path.get()) 
-                else : self.frame = self.vs.read()
-                
+                    self.frame = get_image(self.path.get())
+                else:
+                    self.frame = self.vs.read()
+
                 if self.frame is None:
                     break
-
                 image = Image.fromarray(self.frame)
                 image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
                 image, motion, detection, boxes = self.image_processing.process_image(
@@ -422,7 +425,6 @@ class Interface(tk.Tk):
                 for box in boxes:
                     box.resize(detection.size[0], image.size[0])
                     image = self.draw_rectangle(image, box)
-
                 proportion = 1
                 if image.size[0] > image.size[1]:
                     proportion = 1280 / image.size[0]
@@ -445,23 +447,24 @@ class Interface(tk.Tk):
                         self.display_image(motion, self.motion_label)
                     except:
                         self.motion_label = None
-
                 if self.stat != None and time() - last_stat_update > 1:
                     try:
                         self.add_stat()
                     except:
                         self.stat = None
                     last_stat_update = time()
-
                 if len(boxes) >= 1 and self.alert_sent == False:
-                    if self.mail != '':
+                    if self.mail != "":
                         image.save("images/IPcam.png")
-                        thread_send_email = threading.Thread(target=lambda: send_alert.send_email(str(self.mail)))
+                        thread_send_email = threading.Thread(
+                            target=lambda: send_alert.send_email(str(self.mail))
+                        )
                         thread_send_email.start()
                         self.alert_sent = True
-
-                    if self.sms != '':
-                        thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms(str(self.sms)))
+                    if self.sms != "":
+                        thread_send_sms = threading.Thread(
+                            target=lambda: send_alert.send_sms(str(self.sms))
+                        )
                         thread_send_sms.start()
                         self.alert_sent = True
         except:

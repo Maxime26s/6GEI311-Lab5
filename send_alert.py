@@ -21,53 +21,54 @@ def send_email(destination):
     email_text = MIMEText("Mouvement detected on the camera at " + dt_string)
     mail.attach(email_text)
 
-    mail['From'] = '6gei311@gmail.com'
-    mail['Pass'] = 'M9hA7C6RN8nr'
-    mail['To'] = destination
-    mail['Subject'] = "Alert - Mouvement detected"
-    
+    mail["From"] = "6gei311@gmail.com"
+    mail["Pass"] = "M9hA7C6RN8nr"
+    mail["To"] = destination
+    mail["Subject"] = "Alert - Mouvement detected"
+
     ImgFileName = "images/IPcam.png"
-    with open(ImgFileName, 'rb') as f:
+    with open(ImgFileName, "rb") as f:
         img_data = f.read()
-    
+
     if img_data is not None:
         image = MIMEImage(img_data, name="IPcam1_" + dt_string1 + ".png")
         mail.attach(image)
 
     try:
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
         server.ehlo()
-        server.login(mail['From'], mail['Pass'])
+        server.login(mail["From"], mail["Pass"])
 
     except:
-        print ('Error logging')
+        print("Error logging")
 
     try:
-        server.sendmail(mail['From'], mail['To'], mail.as_string())
-        print('Email sent')
+        server.sendmail(mail["From"], mail["To"], mail.as_string())
+        print("Email sent")
     except:
-        print('Error sending email')
+        print("Error sending email")
         return
     server.quit()
     return
+
 
 def send_sms(destination):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
-    account_sid = os.environ['TWILIO_ACCOUNT_SID']
-    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    account_sid = os.environ["TWILIO_ACCOUNT_SID"]
+    auth_token = os.environ["TWILIO_AUTH_TOKEN"]
     client = Client(account_sid, auth_token)
 
-    message = client.messages \
-                    .create(
-                        body="/!\ Alert /!\ Suspicious movement detected. \n " \
-                             "Check your mail. \n\n" \
-                             + dt_string,
-                        from_='+15812055890',
-                        to=destination
-                 )
+    message = client.messages.create(
+        body="/!\ Alert /!\ Suspicious movement detected. \n "
+        "Check your mail. \n\n" + dt_string,
+        from_="+15812055890",
+        to=destination,
+    )
     print(message.sid)
+
+
 if __name__ == "__main__":
     send_email()
     # send_sms()
