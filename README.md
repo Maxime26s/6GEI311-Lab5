@@ -69,8 +69,6 @@ Python 3.9
 - Pour une vidéo via un lien de camera IP, coller le lien dans l’entrée. Des exemples de lien sont disponibles dans le fichier texte “videos_link.txt” dans le dossier “Vidéos” du projet. 
 - Confirmer la sélection 
 
-## Rapport
-
 ## Sources
 
 - I. Kudriavtsev. [« High-Performance Noise-tolerant Motion Detector in Python, OpenCV, and Numba. »](https://bitworks.software/en/high-speed-movement-detector-opencv-numba-numpy-python.html)
