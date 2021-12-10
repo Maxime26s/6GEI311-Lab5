@@ -1,21 +1,19 @@
 REM Script d'initialisation de l'environnement
-REM ajuster le chemin d'acces
+REM Ajuster le chemin d'acces
 set path=%path%;c:\python3;c:\python3\scripts
-REM se creer un repertoire a la racine
-mkdir a
-cd a
+REM Creer un repertoire
+mkdir venv
+cd venv
 REM Creer un environnement virtuel
 pip install virtualenv
 virtualenv .
 REM Activer l'environnement
 Scripts\activate
+REM Récupère le projet du repository GitHub
 cd ..
-REM Recuperer le depot
 git clone https://github.com/Maxime26s/6GEI311-Lab5.git
 cd 6GEI311-Lab5
-REM Installer les dependances du projet
-REM il faut que votre projet ait un fichier requirements.txt
+REM Installe les dépendances du fichier requirements.txt
 pip install -r requirements.txt
-REM Faire votre programme
-REM Le lancer avec
+REM Exécute le programme
 py main.py
