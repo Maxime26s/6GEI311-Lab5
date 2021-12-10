@@ -198,7 +198,6 @@ class Options(tk.Toplevel):
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
-        # self.path = None
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
@@ -216,8 +215,6 @@ class Interface(tk.Tk):
         self.sms = ""
         # self.vs = VideoStream(src=0).start()
         # self.start_thread()
-
-        # self.path = tk.StringVar(value=None)
 
     # Création de boutons
     def create_main(self):
