@@ -7,6 +7,17 @@ Python 3.9
 
 ## Installation
 
+### Installer le logiciel
+
+#### Si le projet n'est pas cloner
+- Télécharger le fichier "install.bat".
+- Run le fichier "install.bat" pour cloner le projet, installer l'environnement virtuel et ses dépendances.
+- Run le fichier "run.bat" dans le dossier 6GEI311-Lab5 pour exécuter le programme.
+
+#### Si le projet est cloner
+- Run le fichier "setup.bat" dans le dossier 6GEI311-Lab5 pour installer l'environnement virtuel et ses dépendances.
+- Run le fichier "run.bat" dans le dossier 6GEI311-Lab5 pour exécuter le programme.
+
 ### Configurer Twilio 
 
 - Tapez “path” dans la barre de recherche de Windows et allez sur “Modifier les variables d’environnement système”. 
