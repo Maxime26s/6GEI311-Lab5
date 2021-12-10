@@ -439,5 +439,6 @@ if __name__ == "__main__":
     root = Interface()
     root.title("Motion detection")
     root.mainloop()
-    root.thread.stop()
-    root.thread.join(timeout=0.05)
+    if root.thread != None:
+        root.thread.stop()
+        root.thread.join(timeout=0.05)

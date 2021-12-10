@@ -7,12 +7,12 @@ cd a
 REM Creer un environnement virtuel
 pip install virtualenv
 virtualenv .
-REM ou methode alternative
-python -m venv .
 REM Activer l'environnement
 Scripts\activate
+cd ..
 REM Recuperer le depot
 git clone https://github.com/Maxime26s/6GEI311-Lab5.git
+cd 6GEI311-Lab5
 REM Installer les dependances du projet
 REM il faut que votre projet ait un fichier requirements.txt
 pip install -r requirements.txt
