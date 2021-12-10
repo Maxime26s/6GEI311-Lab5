@@ -66,7 +66,7 @@ Python >= 3.9
 
 - Sélectionnez le bouton “Source” 
 - Pour une vidéo locale, appuyez sur le bouton “Browse” et sélectionner le fichier vidéo. Des exemples de fichier vidéo sont disponible dans le dossier “Vidéos” du projet. 
-- Pour une vidéo via un lien de camera IP, coller le lien dans l’entrée. Des exemples de lien sont disponibles dans le fichier texte “videos_link.txt” dans le dossier “Vidéos” du projet. 
+- Pour une vidéo via un lien de camera IP, coller le lien dans l’entrée. Des exemples de lien sont disponibles dans le fichier texte “videos_link.txt”. 
 - Confirmer la sélection 
 
 ## Sources
