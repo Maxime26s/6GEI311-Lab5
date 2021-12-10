@@ -8,7 +8,7 @@ REM Creer un environnement virtuel
 pip install virtualenv
 virtualenv .
 REM Activer l'environnement
-Scripts\activate
+call .\Scripts\activate
 REM Récupère le projet du repository GitHub
 cd ..
 git clone https://github.com/Maxime26s/6GEI311-Lab5.git
