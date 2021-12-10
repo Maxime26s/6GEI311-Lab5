@@ -65,7 +65,6 @@ class Options(tk.Toplevel):
             self.min_size_ratio.set(oldOptions.min_size_ratio.get())
             self.shouldCombine.set(oldOptions.shouldCombine.get())
             self.gaussian_algo.set(oldOptions.gaussian_algo.get())
-
         self.option = tkinter.Toplevel()
         self.option.geometry("+1000+600")
         self.option.title("Options")
@@ -75,6 +74,7 @@ class Options(tk.Toplevel):
         self.t3 = ttk.Frame(self.tab)
         self.t4 = ttk.Frame(self.tab)
         self.t5 = ttk.Frame(self.tab)
+        self.t6 = ttk.Frame(self.tab)
         self.tab.add(self.t1, text="General")
         self.tab.add(self.t2, text="Resize")
         self.tab.add(self.t3, text="Gaussian blur")
@@ -156,11 +156,11 @@ class Options(tk.Toplevel):
     # Ajoute l'onglet d'option des buffers
     def add_tab4(self):
         self.l1 = Label(self.t4, text="Motion Buffer size", anchor="w")
-        self.l1.grid(row=1, column=0, padx=10, pady=(15, 10))
+        self.l1.grid(row=0, column=0, padx=10, pady=(15, 10))
 
         self.ent6 = Entry(self.t4, textvariable=self.motion_buffer_size, width=21)
         self.ent6.place(width=150, height=50)
-        self.ent6.grid(row=1, column=1, pady=5, padx=10)
+        self.ent6.grid(row=0, column=1, pady=5, padx=10)
 
         self.l2 = Label(self.t4, text="Background Buffer size", anchor="w")
         self.l2.grid(row=1, column=0, padx=10, pady=(15, 10))
@@ -198,7 +198,6 @@ class Options(tk.Toplevel):
 class Interface(tk.Tk):
     # Initialisation de la fenêtre
     def __init__(self):
-        self.path = "./cam2.mp4"
         tk.Tk.__init__(self)
         self.create_main()
         self.label = None
@@ -208,8 +207,12 @@ class Interface(tk.Tk):
         self.alert_sent = False
         self.stat_isOpen = False
         self.last_frame_time = time()
-        self.vs = FileVideoStream(self.path).start()
         self.options = None
+        self.label_all_stat1 = []
+        self.label_all_stat2 = []
+        self.label_all_stat3 = []
+        self.mail = ""
+        self.sms = ""
         # self.vs = VideoStream(src=0).start()
         # self.start_thread()
 
@@ -249,21 +252,94 @@ class Interface(tk.Tk):
 
         button5 = Button(
             self,
-            text="Help",
+            text="Set Alert",
             width=10,
-            # command=partial(self.open_help),
+            command=partial(self.select_alert),
         )
         button5.grid(row=1, column=4, padx=5, pady=5)
 
+    def select_alert(self):
+        self.select_alert_win = tk.Toplevel()
+        self.select_alert_win.title("Select File")
+
+        mail = tk.StringVar()
+        sms = tk.StringVar()
+
+        self.label_select_alert1 = Label(self.select_alert_win, text="Mail", anchor="w")
+        self.label_select_alert1.grid(row=0, column=0, padx=10, pady=(15, 10))
+
+        self.ent_select_alert1 = Entry(
+            self.select_alert_win, textvariable=mail, width=21
+        )
+        self.ent_select_alert1.grid(row=0, column=1, pady=5, padx=10)
+
+        self.label_select_alert2 = Label(self.select_alert_win, text="SMS", anchor="w")
+        self.label_select_alert2.grid(row=1, column=0, padx=10, pady=(15, 10))
+
+        self.ent_select_alert2 = Entry(
+            self.select_alert_win, textvariable=sms, width=21
+        )
+        self.ent_select_alert2.grid(row=1, column=1, pady=5, padx=10)
+
+        def confirm_select_alert():
+            self.mail = mail.get()
+            self.sms = sms.get()
+            self.alert_sent = False
+            self.select_alert_win.destroy()
+
+        btn_confirm = Button(
+            self.select_alert_win,
+            text="Confirm",
+            padx=24,
+            command=confirm_select_alert,
+        )
+        btn_confirm.grid(row=2, columnspan=2, padx=5, pady=5)
+
     # Fonction de sélection de fichier
     def select_file(self):
+        self.select_file_win = tk.Toplevel()
+        self.select_file_win.title("Select File")
+
+        self.path = tk.StringVar()
+
+        self.label_select_file = tk.Label(
+            self.select_file_win, text="Select a file or put a link"
+        )
+        self.label_select_file.grid(row=0, columnspan=2, padx=10, pady=10)
+
+        self.ent_select_file = Entry(
+            self.select_file_win, textvariable=self.path, width=21
+        )
+        self.ent_select_file.place(width=150, height=50)
+        self.ent_select_file.grid(row=1, column=0, pady=5, padx=10)
+
+        button_browse = Button(
+            self.select_file_win,
+            text="Browse",
+            width=10,
+            command=partial(self.select_localfile),
+        )
+        button_browse.grid(row=1, column=1, padx=5, pady=5)
+
+        button_confirm_file = Button(
+            self.select_file_win,
+            text="Confirm",
+            width=10,
+            command=partial(self.confirm_select_file),
+        )
+        button_confirm_file.grid(row=2, columnspan=2, padx=5, pady=5)
+
+    def select_localfile(self):
         if self.thread != None:
             self.stop_thread()
         Tk().withdraw()
         fileName = askopenfilename()
-        self.path = fileName
-        self.vs = FileVideoStream(self.path).start()
+        self.path.set(fileName)
+
+    def confirm_select_file(self):
+        self.vs = FileVideoStream(self.path.get()).start()
         self.start_thread()
+        self.select_file_win.destroy()
 
     # Ouvre la vue du filtre d'image
     def open_motiom_filter(self):
@@ -276,18 +352,12 @@ class Interface(tk.Tk):
 
     # Actualise les statistiques
     def add_stat(self):
-        list_stat = performance_statistics.stats
-        self.label_stat2.destroy()
-        self.label_stat3.destroy()
-        for i in range(len(list_stat)):
-            self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
-            self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
 
-            self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
-            self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
+        self.list_stat = performance_statistics.stats
 
-            self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
-            self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
+        for i in range(len(self.list_stat)):
+            self.label_all_stat1[i]["text"] = self.list_stat[i][0]
+            self.label_all_stat2[i]["text"] = self.list_stat[i][1]
 
     # Ouvre la fenêtre de statistiques
     def open_stat(self):
@@ -296,25 +366,25 @@ class Interface(tk.Tk):
         self.stat.title("Statistiques")
         self.stat_isOpen = True
 
-        list_stat = performance_statistics.stats
-        self.label_stat1 = tk.Label(self.stat, text="Name")
-        self.label_stat1.grid(row=0, column=0, padx=10, pady=10)
+        self.list_stat = performance_statistics.stats
+        self.label_stat_name = tk.Label(self.stat, text="Name")
+        self.label_stat_name.grid(row=0, column=0, padx=10, pady=10)
 
-        self.label_stat2 = tk.Label(self.stat, text="Value")
-        self.label_stat2.grid(row=0, column=1, padx=10, pady=10)
+        self.label_stat_average = tk.Label(self.stat, text="Average Time")
+        self.label_stat_average.grid(row=0, column=1, padx=10, pady=10)
 
-        self.label_stat3 = tk.Label(self.stat, text="Average")
-        self.label_stat3.grid(row=0, column=2, padx=10, pady=10)
+        self.label_all_stat1.clear()
+        self.label_all_stat2.clear()
 
-        for i in range(len(list_stat)):
-            self.label_stat1 = tk.Label(self.stat, text=list_stat[i][0])
+        for i in range(len(self.list_stat)):
+            self.label_stat1 = tk.Label(self.stat, text=self.list_stat[i][0])
             self.label_stat1.grid(row=i + 1, column=0, padx=10, pady=10)
 
-            self.label_stat2 = tk.Label(self.stat, text=list_stat[i][1])
+            self.label_stat2 = tk.Label(self.stat, text=self.list_stat[i][1])
             self.label_stat2.grid(row=i + 1, column=1, padx=10, pady=10)
 
-            self.label_stat3 = tk.Label(self.stat, text=list_stat[i][2])
-            self.label_stat3.grid(row=i + 1, column=2, padx=10, pady=10)
+            self.label_all_stat1.append(self.label_stat1)
+            self.label_all_stat2.append(self.label_stat2)
 
     # Ouvre le menu d'options
     def open_options(self):
@@ -322,62 +392,80 @@ class Interface(tk.Tk):
 
     # Logique de traitement d'image et d'affichage pour chaque frame
     def video_loop(self):
-        last_stat_update = 0
-        while not self.thread.stopped():
-            if self.options != None and self.options.framerate.get() > 0:
-                while time() <= self.last_frame_time + 1 / self.options.framerate.get():
-                    pass
-            self.last_frame_time = time()
-            self.frame = self.vs.read()
-            # self.frame = get_image()
-            if self.frame is None:
-                break
+        try:
+            last_stat_update = 0
+            while not self.thread.stopped():
+                if self.options != None and self.options.framerate.get() > 0:
+                    while (
+                        time()
+                        <= self.last_frame_time + 1 / self.options.framerate.get()
+                    ):
+                        pass
+                self.last_frame_time = time()
+                path = self.path.get()
+                if path[0:4] == "http":
+                    self.frame = get_image(self.path.get())
+                else:
+                    self.frame = self.vs.read()
 
-            image = Image.fromarray(self.frame)
-            image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-            image, motion, detection, boxes = self.image_processing.process_image(image)
-            image = Image.fromarray(image.astype("uint8"))
-            motion = Image.fromarray(motion.astype("uint8"))
-            detection = Image.fromarray(detection.astype("uint8"))
+                if self.frame is None:
+                    break
+                image = Image.fromarray(self.frame)
+                image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+                image, motion, detection, boxes = self.image_processing.process_image(
+                    image
+                )
+                image = Image.fromarray(image.astype("uint8"))
+                motion = Image.fromarray(motion.astype("uint8"))
+                detection = Image.fromarray(detection.astype("uint8"))
 
-            for box in boxes:
-                box.resize(detection.size[0], image.size[0])
-                image = self.draw_rectangle(image, box)
-
-            proportion = 1
-            if image.size[0] > image.size[1]:
-                proportion = 1280 / image.size[0]
-            else:
-                proportion = 720 / image.size[1]
-            newSize = (int(image.size[0] * proportion), int(image.size[1] * proportion))
-            image = Image.fromarray(
-                cv2.resize(
-                    np.asarray(image),
-                    newSize,
-                    cv2.INTER_CUBIC,
-                ).astype("uint8")
-            )
-            self.display_image(image, self.label)
-            if self.motion_label != None:
-                try:
-                    self.display_image(motion, self.motion_label)
-                except:
-                    self.motion_label = None
-
-            if self.stat != None and time() - last_stat_update > 1:
-                try:
-                    self.add_stat()
-                except:
-                    self.stat = None
-                last_stat_update = time()
-
-            if len(boxes) >= 1 and self.alert_sent == False:
-                image.save("images/IPcam.png")
-                # thread_send_email = threading.Thread(target=lambda: send_alert.send_email())
-                # thread_send_sms = threading.Thread(target=lambda: send_alert.send_sms())
-                # thread_send_email.start()
-                # thread_send_sms.start()
-                self.alert_sent = True
+                for box in boxes:
+                    box.resize(detection.size[0], image.size[0])
+                    image = self.draw_rectangle(image, box)
+                proportion = 1
+                if image.size[0] > image.size[1]:
+                    proportion = 1280 / image.size[0]
+                else:
+                    proportion = 720 / image.size[1]
+                newSize = (
+                    int(image.size[0] * proportion),
+                    int(image.size[1] * proportion),
+                )
+                image = Image.fromarray(
+                    cv2.resize(
+                        np.asarray(image),
+                        newSize,
+                        cv2.INTER_CUBIC,
+                    ).astype("uint8")
+                )
+                self.display_image(image, self.label)
+                if self.motion_label != None:
+                    try:
+                        self.display_image(motion, self.motion_label)
+                    except:
+                        self.motion_label = None
+                if self.stat != None and time() - last_stat_update > 1:
+                    try:
+                        self.add_stat()
+                    except:
+                        self.stat = None
+                    last_stat_update = time()
+                if len(boxes) >= 1 and self.alert_sent == False:
+                    if self.mail != "":
+                        image.save("images/IPcam.png")
+                        thread_send_email = threading.Thread(
+                            target=lambda: send_alert.send_email(str(self.mail))
+                        )
+                        thread_send_email.start()
+                        self.alert_sent = True
+                    if self.sms != "":
+                        thread_send_sms = threading.Thread(
+                            target=lambda: send_alert.send_sms(str(self.sms))
+                        )
+                        thread_send_sms.start()
+                        self.alert_sent = True
+        except:
+            return
 
     # Affiche l'image dans un label
     def display_image(self, image, label):

@@ -129,12 +129,10 @@ class ImageProcessing:
             self.kernel = 1
         elif self.kernel % 2 == 0:
             self.kernel = self.kernel + 1
-
         if self.gaussian_algo == "CV2":
             img = cv2.GaussianBlur(img, (self.kernel, self.kernel), 0)
         else:
             img = self.custom_gaussian(img)
-
         return img
 
     # Valeur absolue de la soustraction de deux images
@@ -158,12 +156,10 @@ class ImageProcessing:
             frame = self.motion_buffer[0]
         else:
             frame = image
-
         if self.bg_sum is None:
             self.bg_sum = np.zeros(frame.shape, dtype="float32")
         elif len(self.bg_buffer) == self.bg_buffer_size:
             self.bg_sum = self.bg_sum - self.bg_buffer[0]
-
         self.bg_sum = self.bg_sum + frame
         self.bg_buffer.append(frame)
 
