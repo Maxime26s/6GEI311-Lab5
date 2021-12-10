@@ -3,7 +3,7 @@
 Alan Brucher et Maxime Simard
 
 ## Prérequis
-Python 3.9
+Python >= 3.9
 
 ## Installation
 
