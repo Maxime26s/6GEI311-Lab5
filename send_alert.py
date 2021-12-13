@@ -56,19 +56,19 @@ def send_sms(destination):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
-    account_sid = os.environ["TWILIO_ACCOUNT_SID"]
-    auth_token = os.environ["TWILIO_AUTH_TOKEN"]
+    account_sid = 'ACb4d7f2ea83b8f378d0f8febf8b410d4e'
+    auth_token = 'fa60d3c004f30b77a1f4bf40f394ace1'
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
         body="/!\ Alert /!\ Suspicious movement detected. \n "
         "Check your mail. \n\n" + dt_string,
-        from_="+15812055890",
+        from_='+15812055890',
         to=destination,
     )
     print(message.sid)
 
 
 if __name__ == "__main__":
-    send_email()
-    # send_sms()
+    # send_email()
+    send_sms('+15815609495')
