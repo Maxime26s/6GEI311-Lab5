@@ -18,15 +18,6 @@ Python >= 3.9
 - Run le fichier "setup.bat" dans le dossier 6GEI311-Lab5 pour installer l'environnement virtuel et ses dépendances.
 - Run le fichier "run.bat" dans le dossier 6GEI311-Lab5 pour exécuter le programme.
 
-### Configurer Twilio 
-
-- Tapez “path” dans la barre de recherche de Windows et allez sur “Modifier les variables d’environnement système”. 
-- Allez sur “Variables d’environnement” 
-- Dans “Variables utilisateur pour”, cliquez sur “Nouvelle” 
-- Entrez “TWILIO_ACCOUNT_SID” comme nom de variable et “ACb4d7f2ea83b8f378d0f8febf8b410d4e” comme valeur de variable. 
-- Puis, entrez “TWILIO_AUTH_TOKEN” comme nom de variable et “fa60d3c004f30b77a1f4bf40f394ace1” comme valeur de variable. 
-- Confirmez 
-
 ## Utilisation
 
 ### Envoyer une Alerte 
