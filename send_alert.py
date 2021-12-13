@@ -26,7 +26,7 @@ def send_email(destination):
     mail["To"] = destination
     mail["Subject"] = "Alert - Mouvement detected"
 
-    ImgFileName = "images/IPcam.png"
+    ImgFileName = "IPcam.png"
     with open(ImgFileName, "rb") as f:
         img_data = f.read()
 

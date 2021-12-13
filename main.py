@@ -452,7 +452,7 @@ class Interface(tk.Tk):
                     last_stat_update = time()
                 if len(boxes) >= 1 and self.alert_sent == False:
                     if self.mail != "":
-                        image.save("images/IPcam.png")
+                        image.save("IPcam.png")
                         thread_send_email = threading.Thread(
                             target=lambda: send_alert.send_email(str(self.mail))
                         )
